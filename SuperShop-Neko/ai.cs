@@ -14,7 +14,7 @@ namespace SuperShop_Neko
 {
     public partial class ai : UserControl
     {
-        // API配置 - 使用你提供的API密钥和Pro-128K模型
+        // API配置
         private const string API_KEY = "FhWqRuRfyNxAnKNXsCLP:SabkfQBNZPLxLRvdApEG";
         private const string API_URL = "https://spark-api-open.xf-yun.com/v1/chat/completions";
         private const string MODEL = "pro-128k"; // Pro-128K版本
@@ -24,11 +24,15 @@ namespace SuperShop_Neko
         // 对话历史
         private List<ChatMessage> chatHistory = new List<ChatMessage>();
 
+        // 对话消息列表（用于存储格式化后的对话）
+        private List<FormattedMessage> formattedMessages = new List<FormattedMessage>();
+
         public ai()
         {
             InitializeComponent();
             InitializeHttpClient();
             SetupUI();
+            AddWelcomeMessage();
         }
 
         private void InitializeHttpClient()
@@ -40,19 +44,51 @@ namespace SuperShop_Neko
 
         private void SetupUI()
         {
-            // 设置文本框样式
+        }
 
+        private void AddWelcomeMessage()
+        {
+            // 添加欢迎消息到格式化列表
+            formattedMessages.Add(new FormattedMessage
+            {
+                Sender = "系统",
+                Message = "==========================================",
+                IsRightAligned = false,
+                IsDecoration = true
+            });
+
+            formattedMessages.Add(new FormattedMessage
+            {
+                Sender = "系统",
+                Message = "✨ NekoAI 已启动 ✨",
+                IsRightAligned = false,
+                IsDecoration = true
+            });
+
+            formattedMessages.Add(new FormattedMessage
+            {
+                Sender = "系统",
+                Message = "==========================================",
+                IsRightAligned = false,
+                IsDecoration = true
+            });
+
+            formattedMessages.Add(new FormattedMessage
+            {
+                Sender = "系统",
+                Message = "你好！我是来自异世界的NekoAI，有什么可以帮助你的吗？🐱",
+                IsRightAligned = false
+            });
+
+            // 更新显示
+            UpdateOutputDisplay();
         }
 
         private async void send_Click(object sender, EventArgs e)
         {
             string userMessage = input.Text.Trim();
 
-            if (string.IsNullOrEmpty(userMessage))
-            {
-                MessageBox.Show("请输入消息", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+
 
             try
             {
@@ -60,28 +96,65 @@ namespace SuperShop_Neko
                 send.Enabled = false;
                 input.Enabled = false;
 
-                // 在输出框显示用户消息
-                AddMessageToOutput($"[{DateTime.Now:HH:mm:ss}] 用户", userMessage);
+                // 添加用户消息到格式化列表（右对齐）
+                formattedMessages.Add(new FormattedMessage
+                {
+                    Sender = "用户",
+                    Message = userMessage,
+                    IsRightAligned = true,
+                    Time = DateTime.Now
+                });
+
+                UpdateOutputDisplay();
 
                 // 清空输入框
                 input.Clear();
 
-                // 显示等待提示
-                AddMessageToOutput($"[{DateTime.Now:HH:mm:ss}] NekoAI", "正在思考中...");
+                // 添加等待提示（左对齐）
+                formattedMessages.Add(new FormattedMessage
+                {
+                    Sender = "NekoAI",
+                    Message = "正在思考中...🐱",
+                    IsRightAligned = false,
+                    IsWaiting = true
+                });
 
+                UpdateOutputDisplay();
+
+   
                 // 获取AI回复
                 string aiResponse = await GetAIResponseAsync(userMessage);
 
-                // 移除等待提示，显示实际回复
-                output.Text = output.Text.Replace("正在思考中...", "");
-                AddMessageToOutput($"[{DateTime.Now:HH:mm:ss}] NekoAI", aiResponse);
+                // 移除等待提示
+                formattedMessages.RemoveAll(m => m.IsWaiting);
+
+                // 添加AI回复到格式化列表（左对齐）
+                formattedMessages.Add(new FormattedMessage
+                {
+                    Sender = "NekoAI",
+                    Message = aiResponse,
+                    IsRightAligned = false,
+                    Time = DateTime.Now
+                });
+
+                UpdateOutputDisplay();
 
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"发送失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                AddMessageToOutput($"[{DateTime.Now:HH:mm:ss}] 系统", $"错误: {ex.Message}");
+                // 移除等待提示
+                formattedMessages.RemoveAll(m => m.IsWaiting);
+
+                // 添加错误消息
+                formattedMessages.Add(new FormattedMessage
+                {
+                    Sender = "系统",
+                    Message = $"抱歉，出错了: {ex.Message}",
+                    IsRightAligned = false
+                });
+
+
             }
             finally
             {
@@ -92,26 +165,89 @@ namespace SuperShop_Neko
             }
         }
 
-        private void AddMessageToOutput(string sender, string message)
+        private void UpdateOutputDisplay()
         {
-            // 使用换行符分隔不同消息
-            if (!string.IsNullOrEmpty(output.Text))
+            // 清空输出框
+            output.Clear();
+
+            // 重新生成格式化后的文本
+            foreach (var msg in formattedMessages)
             {
-                output.AppendText(Environment.NewLine);
+                if (msg.IsDecoration)
+                {
+                    // 装饰性消息（居中对齐）
+                    output.AppendText(CenterAlignText(msg.Message) + Environment.NewLine);
+                }
+                else
+                {
+                    // 添加时间戳和发送者
+                    string timestamp = msg.Time.HasValue ? $"[{msg.Time.Value:HH:mm:ss}]" : "";
+                    string senderInfo = $"{timestamp} {msg.Sender}";
+
+                    if (msg.IsRightAligned)
+                    {
+                        // 用户消息（右对齐）
+                        output.AppendText(RightAlignText(senderInfo) + Environment.NewLine);
+                        output.AppendText(RightAlignText(msg.Message) + Environment.NewLine);
+                    }
+                    else
+                    {
+                        // AI消息（左对齐）
+                        output.AppendText(senderInfo + Environment.NewLine);
+
+                        // 将消息按行分割并添加缩进
+                        string[] lines = msg.Message.Split('\n');
+                        foreach (string line in lines)
+                        {
+                            if (!string.IsNullOrWhiteSpace(line))
+                            {
+                                output.AppendText("    " + line + Environment.NewLine);
+                            }
+                        }
+                    }
+
+                    // 添加分隔线
+                    output.AppendText(new string('─', 50) + Environment.NewLine);
+                }
             }
+        }
 
-            // 添加发送者和时间
-            output.AppendText($"{sender}" + Environment.NewLine);
+        private string RightAlignText(string text, int width = 60)
+        {
+            // 右对齐文本
+            string[] lines = text.Split('\n');
+            StringBuilder result = new StringBuilder();
 
-            // 添加消息内容（添加缩进）
-            string[] lines = message.Split('\n');
             foreach (string line in lines)
             {
-                output.AppendText($"    {line}" + Environment.NewLine);
+                if (string.IsNullOrWhiteSpace(line) && line.Length == 0) continue;
+
+                int spacesNeeded = width - line.Length;
+                if (spacesNeeded < 0) spacesNeeded = 0;
+
+                result.Append(new string(' ', spacesNeeded) + line + Environment.NewLine);
             }
 
-            // 添加分隔线
-            output.AppendText(new string('-', 50) + Environment.NewLine);
+            return result.ToString().TrimEnd();
+        }
+
+        private string CenterAlignText(string text, int width = 60)
+        {
+            // 居中对齐文本
+            string[] lines = text.Split('\n');
+            StringBuilder result = new StringBuilder();
+
+            foreach (string line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line) && line.Length == 0) continue;
+
+                int spacesNeeded = (width - line.Length) / 2;
+                if (spacesNeeded < 0) spacesNeeded = 0;
+
+                result.Append(new string(' ', spacesNeeded) + line + Environment.NewLine);
+            }
+
+            return result.ToString().TrimEnd();
         }
 
         private async Task<string> GetAIResponseAsync(string userMessage)
@@ -127,7 +263,7 @@ namespace SuperShop_Neko
                     model = MODEL,
                     messages = chatHistory.ToArray(),
                     temperature = 0.7,
-                    max_tokens = 4096, // Pro-128K最大输出4K tokens
+                    max_tokens = 2048,
                     stream = false
                 };
 
@@ -142,7 +278,12 @@ namespace SuperShop_Neko
 
                 // 发送请求
                 var response = await httpClient.PostAsync(API_URL, content);
-                response.EnsureSuccessStatusCode();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"API错误: {response.StatusCode}");
+                }
 
                 // 解析响应
                 string responseJson = await response.Content.ReadAsStringAsync();
@@ -171,11 +312,11 @@ namespace SuperShop_Neko
                         // 添加AI回复到历史
                         chatHistory.Add(new ChatMessage { role = "assistant", content = aiResponse });
 
-                        // 保持历史记录在一定范围内（可选，避免token超限）
-                        if (chatHistory.Count > 10) // 保留最近10轮对话
+                        // 保持历史记录在一定范围内
+                        if (chatHistory.Count > 10)
                         {
                             chatHistory.RemoveAt(0);
-                            chatHistory.RemoveAt(0); // 移除一对对话
+                            chatHistory.RemoveAt(0);
                         }
 
                         return aiResponse;
@@ -205,23 +346,40 @@ namespace SuperShop_Neko
             public string content { get; set; }
         }
 
+        // 格式化消息类（用于控制对齐）
+        private class FormattedMessage
+        {
+            public string Sender { get; set; }
+            public string Message { get; set; }
+            public bool IsRightAligned { get; set; }
+            public bool IsDecoration { get; set; } = false;
+            public bool IsWaiting { get; set; } = false;
+            public DateTime? Time { get; set; }
+        }
+
         // 处理输入框回车键发送
         private void input_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter && !e.Shift)
+            if (e.KeyCode == Keys.Enter)
             {
-                e.SuppressKeyPress = true; 
-                send.PerformClick();
+                if (e.Shift)
+                {
+                    // Shift+Enter: 换行
+                    int cursorPos = input.SelectionStart;
+                    input.Text = input.Text.Insert(cursorPos, Environment.NewLine);
+                    input.SelectionStart = cursorPos + Environment.NewLine.Length;
+                }
+                else
+                {
+                    // Enter: 发送消息
+                    e.SuppressKeyPress = true;
+                    send.PerformClick();
+                }
             }
         }
 
-        // 清空对话按钮（如果需要可以添加）
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-            output.Clear();
-            chatHistory.Clear();
-        }
 
+        // 组件销毁时清理资源
 
     }
 }
