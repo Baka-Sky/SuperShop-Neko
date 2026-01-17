@@ -30,7 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AntdUI" Version="2.2.3" />
+		<PackageReference Include="AntdUI" Version="2.2.14" />
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3650.58" />
 		<PackageReference Include="MySqlConnector" Version="2.5.0" />
 	</ItemGroup>
