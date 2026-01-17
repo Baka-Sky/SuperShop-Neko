@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
+
+    Example:
+
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
+
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="input1.Text" xml:space="preserve">
+    <value>1 定义
+1.1. “贡献者”
+指创建、参与创建或拥有相关软件的每个个人或法人实体。
+
+1.2. “参与者版本”
+指供款人使用的其他人的供款（如有）与该供款人供款的组合。
+
+1.3. “贡献”
+一个特定的软件贡献者。
+
+1.4. “覆盖的软件”
+指初始贡献者在附件A中附加了通知的源代码格式、该源代码格式的可执行形式以及对该源代码格式的修改，在每种情况下都包括其部分内容。
+
+1.5. “与辅助许可证不兼容”
+方法
+(a) 初始贡献者已将附件B中所述的通知附加到相关软件上；或
+(b) 所涵盖的软件是根据1.1版或更低版本的许可证，但不包括在二级许可证的条款下。
+
+1.6. “可执行形式”
+指除源代码形式外的任何形式的工作。
+
+1.7. “更大的工作”
+指将涵盖软件与其他材料结合在一个或多个单独文件中的作品，该作品不属于涵盖软件。
+
+1.8. “许可证”
+指本文件。
+
+1.9. “可授权的”
+是指有权在最大程度上授予本许可证所转让的任何和所有权利，无论是在初始授予时或之后。
+
+1.10. “修改”
+是指下列任何一种：
+
+（a） 源代码形式的任何文件，其源代码形式是对所涵盖软件内容的添加、删除或修改；或
+
+（b） 源代码形式的任何新文件，其中包含任何涵盖的软件。
+
+1.11. “专利的贡献者”
+是指任何专利权利要求，包括但不限于方法、过程和装置权利要求，在任何可由该贡献者许可的专利中，如果没有许可证的授予，通过制造、使用、出售、要约出售、已经制造、进口或转让其贡献者版本或其贡献者版本而被侵权。
+
+1.12. “二级许可证”
+指GNU通用公共许可证2.0版、GNU通用公共许可证2.1版、GNU Affero通用公共许可证3.0版或这些许可证的任何更高版本。
+
+1.13. “源代码表”
+指进行修改时首选的工程形式。
+
+1.14. “你”（或"你的"）
+指行使本许可证项下权利的个人或法人实体。对于法律实体，“您”包括控制、受您控制或与您共同受控制的任何实体。在本定义中，“控制”是指（a）通过合同或其他方式，直接或间接地引导或管理该实体的权力，或（b）拥有超过该实体已发行股份或实益所有权的百分之五十（50%）。
+
+2. 许可证授予和条件
+2.1. 补助金
+每位出资人特此授予您全球范围内的免版税，
+非独占许可：
+
+（a） 在知识产权（专利或商标除外）下，该出资人可授权使用、复制、提供、修改、展示、执行、分发和以其他方式利用其贡献，无论是在未经修改的基础上，还是作为更大作品的一部分；和
+
+（b） 根据该等贡献者的专利权要求，制作、使用、出售、要约出售、已经制作、进口和以其他方式转让其贡献者或其贡献者版本。
+
+2.2. 生效日期
+第2.1节授予的与任何出资有关的许可证自出资人首次分配该出资之日起生效。
+
+2.3. 授予范围的限制
+第2节中授予的许可证是根据本许可证授予的唯一权利。根据本许可证分发或许可涵盖的软件不会隐含任何额外的权利或许可证。尽管有上述第2.1（b）节的规定，出资人不得授予专利许可：
+
+（a） 对于贡献者从覆盖的软件中删除的任何代码；或
+
+（b） 因以下原因造成的侵权：（i）您和任何其他第三方对涵盖软件的修改，或（ii）其贡献与其他软件的组合（作为贡献者版本的一部分除外）；或
+
+（c） 在未提供专利权的情况下，受管辖软件侵犯的专利权。
+
+本许可证不授予任何出资人的商标、服务标志或徽标的任何权利（除非为遵守第3.4节中的通知要求而有必要）。
+
+2.4. 后续许可证
+如果您选择在本许可证的后续版本（见第10.2节）或第二许可证的条款（如果第3.3节的条款允许）下分发涵盖的软件，则没有任何贡献者会因为您的选择而做出额外的授权。
+
+2.5. 代表
+每位出资人声明，出资人认为其出资是其原创作品，或其有足够的权利授予本许可证所转让的出资权。
+
+2.6. 合理使用
+本许可证并不限制您在合理使用、公平交易或其他同等适用的版权原则下享有的任何权利。
+
+2.7. 条件
+第3.1节、第3.2节、第3.3节和第3.4节是第2.1节中授予许可证的条件。
+
+3. 责任
+3.1. 源代码形式发布
+所有以源代码形式发布的涵盖软件，包括您创建或参与的任何修改，都必须遵守本许可证的条款。您必须通知接收者所涵盖软件的源代码格式受本许可条款的约束，以及他们如何获得本许可证的副本。您不能试图更改或限制收件人在源代码表单中的权限。
+
+3.2. 可执行形式发布
+如果您以可执行形式分发涵盖的软件，则：
+
+（a） 如第3.1节所述，此类涵盖的软件还必须以源代码形式提供，并且您必须通知可执行形式的接收者如何通过合理的方式及时获得此类源代码格式的副本，费用不超过分发给接收方的费用；以及
+
+（b） 您可以根据本许可证的条款分发此类可执行表单，或者根据不同的条款对其进行再授权，前提是可执行表单的许可证不试图限制或更改接收者在本许可证下对源代码表单的权利。
+
+3.3. 较大作品的分发
+您可以根据您选择的条款创建和分发更大的作品，前提是您还必须遵守本许可证对所涵盖软件的要求。如果较大的作品是覆盖软件与受一个或多个二级许可证管辖的作品的组合，并且覆盖的软件与二级许可证不兼容，则本许可证允许您根据此类二级许可证的条款额外分发此类涵盖软件，以便较大作品的接收者可以：，根据他们的选择，根据本许可证或此类二级许可证的条款进一步分发涵盖的软件。
+
+3.4. 通知
+您不得删除或更改所涵盖软件源代码格式中包含的任何许可声明（包括版权声明、专利声明、免责声明或责任限制）的实质内容，除非您可以更改任何许可声明，以纠正已知的事实不实之处。
+
+3.5. 附加条款的适用
+您可以选择向一个或多个受保护软件的接收者提供保修、支持、赔偿或责任义务，并收取费用。但是，您只能代表您自己，而不能代表任何供款人。您必须明确表示，任何此类担保、支持、赔偿或责任义务均由您单独提供，您在此同意赔偿每位出资人因您提供的担保、支持、赔偿或责任条款而产生的任何责任。您可以包括针对任何司法管辖区的额外免责声明和责任限制。
+
+4. 由于法令或法规而无法遵守
+如果由于法令、司法命令或法规的原因，您无法遵守本许可证中关于部分或全部受保护软件的任何条款，则您必须：（a）最大限度地遵守本许可证的条款；以及（b）描述其影响的限制和代码。此类说明必须放在本许可证下涵盖软件的所有发行版中的文本文件中。除法令或法规禁止的范围外，此类描述必须足够详细，以便普通技能的接受者能够理解。
+
+5. 终止
+5.1. 如果您未能遵守本许可证的任何条款，则根据本许可证授予的权利将自动终止。但是，如果您合规，则根据本许可证从特定出资人处授予的权利将被恢复（a）临时，除非该出资人明确并最终终止您的授予，以及（b）在持续的基础上，如果该出资人未能在60岁之前以某种合理方式通知您不合规情况几天后你又回到了合规状态。此外，如果某个特定出资人以某种合理的方式通知您违规行为，您将继续获得该出资人的授权，这是您第一次从该出资人处收到不符合本许可证的通知，并且您在收到通知后的30天内合规。
+
+5.2. 如果您通过主张专利侵权索赔（不包括声明性判决诉讼、反索赔和交叉索赔）对任何实体提起诉讼，声称贡献者版本直接或间接侵犯了任何专利，则本许可证第2.1节项下由任何和所有贡献者授予您的受保护软件的权利将终止。
+
+5.3. 如果根据上述第5.1节或第5.2节终止协议，则在终止之前由您或您的经销商根据本许可有效授予的所有最终用户许可协议（不包括经销商和经销商）应在终止后继续有效。
+
+6. 免责声明
+受保护软件在本许可证下按“原样”提供，无任何明示、默示或法定的保证，包括但不限于所涵盖软件无缺陷、可销售、适合特定用途或不侵权的保证。所涵盖软件的质量和性能的全部风险由您承担。如果任何覆盖的软件在任何方面被证明有缺陷，您（不是任何贡献者）承担任何必要的维修、修理或更正的费用。此免责声明构成本许可证的重要组成部分。除本免责声明外，本许可证未授权使用任何涵盖的软件。
+
+7. 责任限制
+在任何情况下，在任何法律理论下，无论是侵权（包括疏忽）、合同或其他，任何贡献者或按照上述许可分发涵盖软件的任何人，均不对任何性质的任何直接、间接、特殊、附带或后果性损害负责，包括但不限于：，利润损失、商誉损失、停工、计算机故障或故障，或任何和所有其他商业损害或损失的损害赔偿，即使该方已被告知此类损害的可能性。在适用法律禁止的范围内，该责任限制不适用于因该方过失造成的死亡或人身伤害的责任。某些司法管辖区不允许排除或限制附带或间接损害，因此此排除和限制可能不适用于您。
+
+8. 诉讼
+与本许可证有关的任何诉讼只能在被告维持其主要营业地的司法管辖区的法院提起，此类诉讼应受该司法管辖区的法律管辖，不涉及其法律冲突条款。本节的任何规定均不妨碍一方提出交叉索赔或反索赔的能力。
+
+9. 其他
+本许可证代表有关本协议标的物的完整协议。如果本许可证的任何条款被认定为不可执行，则该条款应仅在使其可执行的必要范围内进行改革。任何法律或法规规定合同语言应被解释为对起草人不利，不得将本许可证解释为针对出资人。
+
+10. 许可证的版本
+10.1. 新版本
+Mozilla基金会是许可证管理员。除了steward 3的一个版本外，其他版本都没有修改的权利。每个版本都会有一个不同的版本号。
+
+10.2. 新版本的效果
+您可以根据您最初收到受保护软件的许可证版本的条款，或根据许可证管理员发布的任何后续版本的条款，分发受保护软件。
+
+10.3. 修改后的版本
+如果您创建不受本许可证管辖的软件，并且您希望为此类软件创建新的许可证，则可以创建和使用此许可证的修改版本，前提是重命名许可证并删除对许可证管理员姓名的任何引用（请注意，修改后的许可证与本许可证不同）。
+
+10.4. 分发与辅助许可证不兼容的源代码形式
+如果您选择分发与此版本许可条款下的二级许可不兼容的源代码形式，则必须附上本许可证附件B中所述的通知。
+
+附件A-源代码格式许可声明
+此源代码表单受Mozilla公共许可证2.0版条款的约束。如果MPL的副本没有随此文件一起分发，您可以在http://mozilla.org/MPL/2.0/。
+
+如果不可能或不希望将通知放入特定文件中，则可以将通知包含在收件人可能会查找此类通知的位置（例如相关目录中的许可文件）。
+
+您可以添加其他准确的版权所有权声明。
+
+附件B-“与二级许可证不兼容”通知
+这个源代码表单与Mozilla公共许可证v.2.0定义的“与辅助许可证不兼容”。
+————————————————</value>
+  </data>
+</root>
