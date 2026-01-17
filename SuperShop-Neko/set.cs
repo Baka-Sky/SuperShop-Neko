@@ -124,12 +124,6 @@ namespace SuperShop_Neko
         /// <summary>
         /// 通知主窗体刷新主题色
         /// </summary>
-        /// <summary>
-        /// 通知主窗体刷新主题色
-        /// </summary>
-        /// <summary>
-        /// 通知主窗体刷新主题色
-        /// </summary>
         private void NotifyMainFormToRefreshTheme()
         {
             try
@@ -138,7 +132,7 @@ namespace SuperShop_Neko
                 Form1 mainForm = FindMainForm();
                 if (mainForm != null)
                 {
-                    // 调用Form1的刷新方法 - 改为调用RefreshTheme()
+                    // 调用Form1的刷新方法
                     mainForm.RefreshTheme();
 
                     // 刷新所有子控件的主题
@@ -158,17 +152,8 @@ namespace SuperShop_Neko
         {
             try
             {
-                // 查找并刷新所有需要主题色的控件
-                foreach (Control control in form.Controls)
-                {
-                    RefreshControlThemeIfSupported(control);
-
-                    // 递归查找子控件
-                    if (control.HasChildren)
-                    {
-                        FindAndRefreshChildControls(control);
-                    }
-                }
+                // 从顶层窗体开始递归刷新
+                FindAndRefreshChildControls(form);
             }
             catch
             {
@@ -181,28 +166,35 @@ namespace SuperShop_Neko
         /// </summary>
         private void RefreshControlThemeIfSupported(Control control)
         {
-            // 检查是否是 app 控件
-            if (control is app appControl)
+            try
             {
-                appControl.RefreshTheme();
-                return;
-            }
+                // 检查是否是 app 控件
+                if (control is app appControl)
+                {
+                    appControl.RefreshTheme();
+                    return;
+                }
 
-            // 检查是否是 tools 控件
-            if (control is tools toolsControl)
+                // 检查是否是 tools 控件
+                if (control is tools toolsControl)
+                {
+                    toolsControl.RefreshTheme();
+                    return;
+                }
+
+                // 检查是否是 more 控件
+                if (control is more moreControl)
+                {
+                    moreControl.RefreshTheme();
+                    return;
+                }
+
+                // 可以在这里添加其他需要主题色的控件类型
+            }
+            catch
             {
-                toolsControl.RefreshTheme();
-                return;
+                // 静默失败
             }
-
-            // 检查是否是 more 控件
-            if (control is more moreControl)
-            {
-                moreControl.RefreshTheme();
-                return;
-            }
-
-            // 可以在这里添加其他需要主题色的控件类型
         }
 
         /// <summary>
@@ -210,14 +202,23 @@ namespace SuperShop_Neko
         /// </summary>
         private void FindAndRefreshChildControls(Control parent)
         {
-            foreach (Control control in parent.Controls)
+            try
             {
-                RefreshControlThemeIfSupported(control);
+                // 先处理当前控件
+                RefreshControlThemeIfSupported(parent);
 
-                if (control.HasChildren)
+                // 然后递归处理所有子控件
+                if (parent.HasChildren)
                 {
-                    FindAndRefreshChildControls(control);
+                    foreach (Control control in parent.Controls)
+                    {
+                        FindAndRefreshChildControls(control);
+                    }
                 }
+            }
+            catch
+            {
+                // 静默失败
             }
         }
 
@@ -237,6 +238,12 @@ namespace SuperShop_Neko
         {
             LoadConfigSilently();
             NotifyMainFormToRefreshTheme();
+        }
+
+        private void clean_Click(object sender, EventArgs e)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers(); // 等待所有终结器执行完毕
         }
     }
 }
