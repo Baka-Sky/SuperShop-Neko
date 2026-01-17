@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 using System.Text.Json;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SuperShop_Neko
 {
@@ -11,13 +13,253 @@ namespace SuperShop_Neko
         private Config config;
         private bool isInitializing = true;
 
+        // 主题色相关
+        private Color themeColor = Color.Empty;
+        private bool useThemeColor = false;
+
+        // 所有按钮的列表
+        private List<AntdUI.Button> allButtons = new List<AntdUI.Button>();
+
         public set()
         {
             InitializeComponent();
 
+            // 收集所有按钮
+            CollectAllButtons();
+
             // 加载配置并初始化
             LoadConfigSilently();
             isInitializing = false;
+
+            Debug.WriteLine("[set] 控件初始化完成");
+        }
+
+        /// <summary>
+        /// 收集所有按钮
+        /// </summary>
+        private void CollectAllButtons()
+        {
+            Debug.WriteLine("[set] 开始收集按钮");
+
+            // 将所有AntdUI.Button按钮添加到列表中
+            // 注意：这里需要根据您的设计器中的实际按钮名称来添加
+            // 假设您有以下按钮：clean, 以及可能还有其他按钮
+            allButtons = new List<AntdUI.Button>
+            {
+                clean
+                // 如果有更多AntdUI.Button按钮，在这里添加
+                // 例如: button1, button2, ...
+            };
+
+            Debug.WriteLine($"[set] 收集到 {allButtons.Count} 个按钮");
+        }
+
+        /// <summary>
+        /// 加载主题色配置
+        /// </summary>
+        private void LoadThemeColorConfig()
+        {
+            try
+            {
+                Debug.WriteLine("[set] 开始加载主题色配置");
+
+                string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+
+                if (!File.Exists(configPath))
+                {
+                    useThemeColor = false;
+                    Debug.WriteLine("[set] 配置文件不存在");
+                    return;
+                }
+
+                string json = File.ReadAllText(configPath);
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                // 读取color配置
+                if (root.TryGetProperty("color", out var colorElement))
+                {
+                    useThemeColor = colorElement.GetBoolean();
+                    Debug.WriteLine($"[set] color配置: {useThemeColor}");
+
+                    if (useThemeColor && root.TryGetProperty("RGB", out var rgbElement))
+                    {
+                        string rgbString = rgbElement.GetString() ?? "0,0,0";
+                        Debug.WriteLine($"[set] RGB字符串: {rgbString}");
+
+                        string[] parts = rgbString.Split(',');
+
+                        if (parts.Length == 3 &&
+                            int.TryParse(parts[0], out int r) &&
+                            int.TryParse(parts[1], out int g) &&
+                            int.TryParse(parts[2], out int b))
+                        {
+                            themeColor = Color.FromArgb(r, g, b);
+                            Debug.WriteLine($"[set] 主题色解析成功: R={r}, G={g}, B={b}");
+                            ApplyThemeToAllButtons();
+                        }
+                        else
+                        {
+                            Debug.WriteLine("[set] RGB格式解析失败");
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("[set] 配置文件中未找到color属性");
+                }
+            }
+            catch (Exception ex)
+            {
+                useThemeColor = false;
+                Debug.WriteLine($"[set] 加载主题色配置异常: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 应用主题色到所有按钮
+        /// </summary>
+        private void ApplyThemeToAllButtons()
+        {
+            if (!useThemeColor || themeColor == Color.Empty)
+            {
+                Debug.WriteLine("[set] 未启用主题色或主题色为空");
+                return;
+            }
+
+            try
+            {
+                Debug.WriteLine($"[set] 开始应用主题色到 {allButtons.Count} 个按钮");
+                int successCount = 0;
+
+                foreach (var button in allButtons)
+                {
+                    if (button != null)
+                    {
+                        try
+                        {
+                            ApplyColorToButton(button, themeColor);
+                            successCount++;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"[set] 应用主题色到按钮 {button.Name} 失败: {ex.Message}");
+                        }
+                    }
+                }
+
+                Debug.WriteLine($"[set] 主题色应用完成: 成功 {successCount}/{allButtons.Count}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[set] 应用主题色异常: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 应用颜色到单个按钮
+        /// </summary>
+        private void ApplyColorToButton(AntdUI.Button button, Color color)
+        {
+            if (button == null)
+            {
+                Debug.WriteLine("[set] 按钮为空，无法应用颜色");
+                return;
+            }
+
+            try
+            {
+                Debug.WriteLine($"[set] 应用颜色到按钮: {button.Name}");
+
+                // 设置按钮颜色
+                button.BackColor = color;
+                button.DefaultBack = color;
+
+                // 设置悬停色（比主题色稍亮）
+                Color hoverColor = Color.FromArgb(
+                    Math.Min(color.R + 20, 255),
+                    Math.Min(color.G + 20, 255),
+                    Math.Min(color.B + 20, 255)
+                );
+                button.BackHover = hoverColor;
+
+                // 文字颜色保持设计器中的设置，不随背景色改变
+
+                button.Invalidate();
+                Debug.WriteLine($"[set] 按钮 {button.Name} 颜色应用完成");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[set] 应用颜色到按钮 {button.Name} 异常: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 刷新主题色（当配置改变时调用）
+        /// </summary>
+        public void RefreshTheme()
+        {
+            try
+            {
+                Debug.WriteLine("[set] 开始刷新主题");
+                LoadThemeColorConfig();
+
+                if (useThemeColor && themeColor != Color.Empty)
+                {
+                    Debug.WriteLine("[set] 应用新主题色");
+                    ApplyThemeToAllButtons();
+                }
+                else
+                {
+                    Debug.WriteLine("[set] 重置按钮到默认颜色");
+                    ResetButtonsToDefault();
+                }
+
+                Debug.WriteLine("[set] 主题刷新完成");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[set] 刷新主题异常: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 重置按钮到设计器默认颜色
+        /// </summary>
+        private void ResetButtonsToDefault()
+        {
+            try
+            {
+                Debug.WriteLine($"[set] 开始重置 {allButtons.Count} 个按钮的默认颜色");
+                int successCount = 0;
+
+                foreach (var button in allButtons)
+                {
+                    if (button != null)
+                    {
+                        try
+                        {
+                            // 重置为默认值
+                            button.BackColor = Color.Empty;
+                            button.DefaultBack = Color.Empty;
+                            button.BackHover = Color.Empty;
+                            // 注意：ForeColor不重置，保持原来的文字颜色
+                            button.Invalidate();
+                            successCount++;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"[set] 重置按钮 {button.Name} 失败: {ex.Message}");
+                        }
+                    }
+                }
+
+                Debug.WriteLine($"[set] 按钮重置完成: 成功 {successCount}/{allButtons.Count}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[set] 重置按钮异常: {ex.Message}");
+            }
         }
 
         // 加载配置
@@ -36,6 +278,9 @@ namespace SuperShop_Neko
                 {
                     SilentUpdateThemeColor();
                 }
+
+                // 加载主题色配置
+                LoadThemeColorConfig();
             }
             catch
             {
@@ -114,6 +359,9 @@ namespace SuperShop_Neko
 
                 // 显示当前颜色（用于调试）
                 Console.WriteLine($"当前主题色: {config.RGB}");
+
+                // 同时刷新本控件的按钮颜色
+                RefreshTheme();
             }
             catch (Exception ex)
             {
@@ -186,6 +434,13 @@ namespace SuperShop_Neko
                 if (control is more moreControl)
                 {
                     moreControl.RefreshTheme();
+                    return;
+                }
+
+                // 检查是否是 set 控件
+                if (control is set setControl)
+                {
+                    setControl.RefreshTheme();
                     return;
                 }
 
