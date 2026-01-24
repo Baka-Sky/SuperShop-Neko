@@ -29,7 +29,7 @@ namespace SuperShop_Neko
             Application.SetDefaultFont(new Font("Microsoft YaHei UI", 9f));
 
             // 正常启动主窗体
-            Application.Run(new Form1());
+            Application.Run(new boot());
         }
 
         // ==================== 新增的异常处理方法 ====================

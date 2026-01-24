@@ -143,6 +143,16 @@ namespace SuperShop_Neko.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap imageres_014 {
+            get {
+                object obj = ResourceManager.GetObject("imageres 014", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap imageres_085 {
             get {
                 object obj = ResourceManager.GetObject("imageres 085", resourceCulture);
@@ -286,6 +296,16 @@ namespace SuperShop_Neko.Properties {
         internal static System.Drawing.Bitmap 未标题_1 {
             get {
                 object obj = ResourceManager.GetObject("未标题-1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 未标题_11 {
+            get {
+                object obj = ResourceManager.GetObject("未标题-11", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
