@@ -85,7 +85,7 @@ namespace SuperShop_Neko
                 await webview.EnsureCoreWebView2Async(null);
 
                 // 加载Bing
-                webview.CoreWebView2.Navigate("https://www.bing.com");
+                webview.CoreWebView2.Navigate("https://shop.baka233.top/Logo/html.html");
                 _webViewInitialized = true;
 
                 // 显示WebView
