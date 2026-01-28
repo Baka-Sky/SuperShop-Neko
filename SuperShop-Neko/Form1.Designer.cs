@@ -157,6 +157,7 @@
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "超级小铺";
+            FormClosing += Form1_FormClosing_1;
             page.ResumeLayout(false);
             panel1.ResumeLayout(false);
             ResumeLayout(false);

@@ -14,7 +14,7 @@ namespace SuperShop_Neko
         private const string CLIENT_NAME = "SuperShop_Neko";
         private const string CLIENT_ID = "supershop_neko_client_v1";
         private const string SECRET_SALT = "baka233_supershop_secret_2024";
-        private const string API_BASE_URL = "http://localhost:25568";
+        private const string API_BASE_URL = "http://171.80.1.4:25568";
 
         /// <summary>
         /// 生成客户端令牌

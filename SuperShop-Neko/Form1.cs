@@ -69,6 +69,13 @@ namespace SuperShop_Neko
             }));
         }
 
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // 立即终止整个进程
+            System.Diagnostics.Process.GetCurrentProcess().Kill();
+        }
+
+
         /// <summary>
         /// 收集所有按钮
         /// </summary>
@@ -750,5 +757,14 @@ namespace SuperShop_Neko
         {
             return currentPage;
         }
+
+        private void Form1_FormClosing_1(object sender, FormClosingEventArgs e)
+        {
+
+            // 立即终止整个进程
+            System.Diagnostics.Process.GetCurrentProcess().Kill();
+
+
     }
+}
 }
