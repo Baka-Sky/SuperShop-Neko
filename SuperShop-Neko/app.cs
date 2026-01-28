@@ -1,19 +1,20 @@
-﻿using MySqlConnector;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Drawing;
-using System.Threading;
+using System.Net.Http;
 using System.IO;
-using System.Text.Json;
+using AntdUI;
 
 namespace SuperShop_Neko
 {
     public partial class app : UserControl
     {
-        public static string mysqlcon = "server=api.baka233.top;database=supershop;user=sudabaka;password=jianghao0523;";
-
         private List<AppItem> dataList = new List<AppItem>();
         private bool isLoading = false;
 
@@ -25,20 +26,27 @@ namespace SuperShop_Neko
         {
             InitializeComponent();
             InitializeDataGridView();
-
-            // 加载主题色配置
             LoadThemeColorConfig();
         }
 
-        /// <summary>
-        /// 加载主题色配置
-        /// </summary>
+        #region 初始化方法
+        private void InitializeDataGridView()
+        {
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AllowUserToDeleteRows = false;
+            dataGridView1.ReadOnly = true;
+            dataGridView1.RowHeadersVisible = false;
+            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            查看出处.UseColumnTextForButtonValue = true;
+            下载.UseColumnTextForButtonValue = true;
+            dataGridView1.CellClick += DataGridView1_CellClick;
+        }
+
         private void LoadThemeColorConfig()
         {
             try
             {
                 string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
-
                 if (!File.Exists(configPath))
                 {
                     useThemeColor = false;
@@ -49,16 +57,13 @@ namespace SuperShop_Neko
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
 
-                // 读取color配置
                 if (root.TryGetProperty("color", out var colorElement))
                 {
                     useThemeColor = colorElement.GetBoolean();
-
                     if (useThemeColor && root.TryGetProperty("RGB", out var rgbElement))
                     {
                         string rgbString = rgbElement.GetString() ?? "0,0,0";
                         string[] parts = rgbString.Split(',');
-
                         if (parts.Length == 3 &&
                             int.TryParse(parts[0], out int r) &&
                             int.TryParse(parts[1], out int g) &&
@@ -76,198 +81,187 @@ namespace SuperShop_Neko
             }
         }
 
-        /// <summary>
-        /// 应用主题色到按钮
-        /// </summary>
         private void ApplyThemeToButtons()
         {
             if (!useThemeColor || themeColor == Color.Empty) return;
-
             try
             {
-                // 应用主题色到所有按钮
                 ApplyColorToButton(upbutton, themeColor);
                 ApplyColorToButton(delbtn, themeColor);
                 ApplyColorToButton(reload, themeColor);
-
-                // 如果需要，也可以应用到DataGridView的按钮列
                 ApplyThemeToDataGridView();
             }
-            catch
-            {
-                // 静默失败
-            }
+            catch { }
         }
 
-        /// <summary>
-        /// 应用颜色到单个按钮
-        /// </summary>
         private void ApplyColorToButton(Control button, Color color)
         {
             if (button == null) return;
-
             try
             {
-                // 对于AntdUI.Button
                 if (button is AntdUI.Button antdButton)
                 {
                     antdButton.BackColor = color;
                     antdButton.DefaultBack = color;
-
-                    // 设置悬停色（比主题色稍亮）
                     Color hoverColor = Color.FromArgb(
                         Math.Min(color.R + 20, 255),
                         Math.Min(color.G + 20, 255),
                         Math.Min(color.B + 20, 255)
                     );
                     antdButton.BackHover = hoverColor;
-
-                    // 设置文字颜色确保可读性
-
-
                     antdButton.Invalidate();
                 }
-                // 对于普通Button
                 else if (button is System.Windows.Forms.Button winButton)
                 {
                     winButton.BackColor = color;
-
-                    // 设置文字颜色
-
-
                     winButton.Invalidate();
                 }
             }
-            catch
-            {
-                // 忽略错误
-            }
+            catch { }
         }
 
-        /// <summary>
-        /// 应用主题色到DataGridView的按钮列（如果需要）
-        /// </summary>
         private void ApplyThemeToDataGridView()
         {
             try
             {
-                // 设置DataGridView的样式
                 if (useThemeColor && themeColor != Color.Empty)
                 {
-                    // 设置行样式
                     dataGridView1.RowsDefaultCellStyle.BackColor = Color.White;
                     dataGridView1.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(245, 245, 245);
-
-                    // 设置标题行样式
                     dataGridView1.ColumnHeadersDefaultCellStyle.BackColor = themeColor;
                     dataGridView1.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
                     dataGridView1.ColumnHeadersDefaultCellStyle.Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Bold);
-
-                    // 设置选中行样式
                     dataGridView1.RowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(
                         Math.Min(themeColor.R + 40, 255),
                         Math.Min(themeColor.G + 40, 255),
                         Math.Min(themeColor.B + 40, 255)
                     );
                     dataGridView1.RowsDefaultCellStyle.SelectionForeColor = Color.White;
-
-                    // 刷新显示
                     dataGridView1.Invalidate();
                 }
             }
-            catch
-            {
-                // 忽略错误
-            }
+            catch { }
         }
+        #endregion
 
-        private void InitializeDataGridView()
+        #region API调用方法
+        private async Task<bool> TestApiConnection()
         {
-            // 设置 DataGridView 基本属性
-            dataGridView1.AllowUserToAddRows = false;
-            dataGridView1.AllowUserToDeleteRows = false;
-            dataGridView1.ReadOnly = true;
-            dataGridView1.RowHeadersVisible = false;
-            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-
-            // 确保按钮列显示文字
-            查看出处.UseColumnTextForButtonValue = true;
-            下载.UseColumnTextForButtonValue = true;
-
-            // 绑定单元格点击事件
-            dataGridView1.CellClick += DataGridView1_CellClick;
+            return await AuthHelper.VerifyClientConnection();
         }
 
-        private void app_Load(object sender, EventArgs e)
-        {
-            // 确保主题色已应用
-            if (useThemeColor && themeColor != Color.Empty)
-            {
-                ApplyThemeToButtons();
-            }
-
-            // 使用统一的 Spin 方法加载数据
-            LoadDataWithSpin();
-        }
-
-        // 统一的加载数据方法（始终使用 AntdUI.Spin.open）
-        private void LoadDataWithSpin()
+        private async void LoadDataWithSpin()
         {
             if (isLoading) return;
             isLoading = true;
 
-            AntdUI.Spin.open(this, config =>
+            AntdUI.Spin.open(this, async config =>
             {
                 try
                 {
-                    config.Text = "正在连接数据库...";
-                    Thread.Sleep(300);
+                    config.Text = "正在验证客户端...";
 
-                    config.Text = "正在查询数据...";
-                    dataList.Clear();
-
-                    using (var connection = new MySqlConnection(mysqlcon))
+                    bool connected = await TestApiConnection();
+                    if (!connected)
                     {
-                        connection.Open();
-                        // 查询所有字段，包括出处
-                        string sql = "SELECT 软件名, 链接, 上传者, 出处 FROM app";
-
-                        using (var command = new MySqlCommand(sql, connection))
-                        using (var reader = command.ExecuteReader())
+                        config.Text = "客户端验证失败";
+                        this.Invoke(new Action(() =>
                         {
-                            config.Text = "正在读取数据...";
-                            int count = 0;
-
-                            while (reader.Read())
-                            {
-                                var item = new AppItem
-                                {
-                                    软件名 = reader["软件名"]?.ToString() ?? "",
-                                    链接 = reader["链接"]?.ToString() ?? "",
-                                    上传者 = reader["上传者"]?.ToString() ?? "",
-                                    出处 = reader["出处"]?.ToString() ?? ""
-                                };
-
-                                dataList.Add(item);
-                                count++;
-
-                                if (count % 5 == 0)
-                                {
-                                    config.Text = $"已读取 {count} 条数据...";
-                                }
-                            }
-
-                            config.Text = $"共读取 {count} 条数据";
-                        }
+                            MessageBox.Show("客户端验证失败！\n请确保：\n1. Python后端正在运行\n2. 使用正确的软件版本\n3. 网络连接正常",
+                                "鉴权错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }));
+                        return;
                     }
 
-                    this.Invoke(new Action(() =>
-                    {
-                        BindDataToGridView();
-                    }));
+                    config.Text = "正在获取数据...";
 
-                    config.Text = "加载完成";
-                    Thread.Sleep(300);
+                    var requestData = new Dictionary<string, object>();
+                    var response = await AuthHelper.SendAuthPostRequest("/get_apps", requestData);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        string errorText = await response.Content.ReadAsStringAsync();
+                        config.Text = "请求失败";
+
+                        // 尝试解析错误信息
+                        string errorMessage = $"HTTP错误: {response.StatusCode}";
+                        try
+                        {
+                            using (JsonDocument doc = JsonDocument.Parse(errorText))
+                            {
+                                JsonElement root = doc.RootElement;
+                                if (root.TryGetProperty("error", out JsonElement errorElement))
+                                {
+                                    errorMessage = errorElement.GetString();
+                                }
+                                if (root.TryGetProperty("error_code", out JsonElement errorCodeElement))
+                                {
+                                    errorMessage += $"\n错误代码: {errorCodeElement.GetString()}";
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            errorMessage += $"\n响应: {errorText}";
+                        }
+
+                        throw new Exception(errorMessage);
+                    }
+
+                    string responseText = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"API响应: {responseText}");
+
+                    using (JsonDocument doc = JsonDocument.Parse(responseText))
+                    {
+                        JsonElement root = doc.RootElement;
+
+                        if (!root.TryGetProperty("success", out JsonElement successElement) || !successElement.GetBoolean())
+                        {
+                            string error = root.TryGetProperty("error", out JsonElement errorElement)
+                                ? errorElement.GetString()
+                                : "未知错误";
+                            throw new Exception($"API错误: {error}");
+                        }
+
+                        dataList.Clear();
+
+                        if (root.TryGetProperty("data", out JsonElement dataElement) && dataElement.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (JsonElement item in dataElement.EnumerateArray())
+                            {
+                                string appId = item.TryGetProperty("AppID", out JsonElement appIdElement)
+                                    ? appIdElement.GetString() ?? ""
+                                    : "";
+                                string downId = item.TryGetProperty("DownID", out JsonElement downIdElement)
+                                    ? downIdElement.GetString() ?? ""
+                                    : "";
+                                string who = item.TryGetProperty("Who", out JsonElement whoElement)
+                                    ? whoElement.GetString() ?? ""
+                                    : "";
+                                string form = item.TryGetProperty("Form", out JsonElement formElement)
+                                    ? formElement.GetString() ?? ""
+                                    : "";
+
+                                dataList.Add(new AppItem
+                                {
+                                    软件名 = appId,
+                                    链接 = downId,
+                                    上传者 = who,
+                                    出处 = form
+                                });
+                            }
+                        }
+
+                        int count = dataList.Count;
+                        config.Text = $"获取到 {count} 条数据";
+
+                        this.Invoke(new Action(() =>
+                        {
+                            BindDataToGridView();
+                        }));
+
+                        config.Text = "加载完成";
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -277,6 +271,7 @@ namespace SuperShop_Neko
                         MessageBox.Show($"数据加载失败: {ex.Message}", "错误",
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }));
+                    Console.WriteLine($"加载异常: {ex.Message}\n{ex.StackTrace}");
                 }
                 finally
                 {
@@ -284,61 +279,226 @@ namespace SuperShop_Neko
                 }
             }, () =>
             {
-                // 加载完成后的回调
                 isLoading = false;
             });
         }
 
-        // 绑定数据到 DataGridView
-        private void BindDataToGridView()
+        public async Task<bool> AddApp(string softwareName, string link, string uploader, string source = "")
         {
             try
             {
-                // 清除现有数据
-                dataGridView1.Rows.Clear();
-
-                // 添加数据行
-                foreach (var item in dataList)
+                var appData = new Dictionary<string, string>
                 {
-                    int rowIndex = dataGridView1.Rows.Add(
-                        item.软件名,
-                        item.链接,
-                        item.上传者,
-                        "查看出处",
-                        "下载"
-                    );
+                    { "软件名", softwareName },
+                    { "链接", link },
+                    { "上传者", uploader },
+                    { "出处", source }
+                };
 
-                    // 将完整对象存储在 Tag 中
-                    dataGridView1.Rows[rowIndex].Tag = item;
-                }
+                var response = await AuthHelper.SendAuthPostRequest("/add_app", appData);
+                string responseText = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"添加应用响应: {responseText}");
 
-                // 如果没有数据，显示提示
-                if (dataGridView1.Rows.Count == 0)
+                using (JsonDocument doc = JsonDocument.Parse(responseText))
                 {
-                    dataGridView1.Rows.Add("", "", "暂无数据", "", "");
-                    dataGridView1.Rows[0].DefaultCellStyle.ForeColor = Color.Gray;
-                    dataGridView1.Rows[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                    JsonElement root = doc.RootElement;
+                    bool success = root.TryGetProperty("success", out JsonElement successElement) && successElement.GetBoolean();
+
+                    if (success)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        string error = root.TryGetProperty("error", out JsonElement errorElement)
+                            ? errorElement.GetString()
+                            : "未知错误";
+                        MessageBox.Show($"添加失败: {error}", "错误",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return false;
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"数据显示失败: {ex.Message}", "错误",
+                MessageBox.Show($"添加失败: {ex.Message}", "错误",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
         }
 
-        // DataGridView 单元格点击事件
+        public async Task<bool> DeleteApp(string softwareName)
+        {
+            try
+            {
+                var deleteData = new Dictionary<string, string>
+                {
+                    { "软件名", softwareName }
+                };
+
+                var response = await AuthHelper.SendAuthPostRequest("/delete_app", deleteData);
+                string responseText = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"删除应用响应: {responseText}");
+
+                using (JsonDocument doc = JsonDocument.Parse(responseText))
+                {
+                    JsonElement root = doc.RootElement;
+                    bool success = root.TryGetProperty("success", out JsonElement successElement) && successElement.GetBoolean();
+
+                    if (success)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        string error = root.TryGetProperty("error", out JsonElement errorElement)
+                            ? errorElement.GetString()
+                            : "未知错误";
+                        MessageBox.Show($"删除失败: {error}", "错误",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"删除失败: {ex.Message}", "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateApp(string originalName, string newName, string link, string uploader, string source = "")
+        {
+            try
+            {
+                var updateData = new Dictionary<string, string>
+                {
+                    { "原始软件名", originalName },
+                    { "软件名", newName },
+                    { "链接", link },
+                    { "上传者", uploader },
+                    { "出处", source }
+                };
+
+                var response = await AuthHelper.SendAuthPostRequest("/update_app", updateData);
+                string responseText = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"更新应用响应: {responseText}");
+
+                using (JsonDocument doc = JsonDocument.Parse(responseText))
+                {
+                    JsonElement root = doc.RootElement;
+                    bool success = root.TryGetProperty("success", out JsonElement successElement) && successElement.GetBoolean();
+
+                    if (success)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        string error = root.TryGetProperty("error", out JsonElement errorElement)
+                            ? errorElement.GetString()
+                            : "未知错误";
+                        MessageBox.Show($"更新失败: {error}", "错误",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"更新失败: {ex.Message}", "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+        #endregion
+
+        #region 界面事件处理
+        private void app_Load(object sender, EventArgs e)
+        {
+            if (useThemeColor && themeColor != Color.Empty)
+            {
+                ApplyThemeToButtons();
+            }
+            LoadDataWithSpin();
+        }
+
+        private void reload_Click(object sender, EventArgs e)
+        {
+            if (isLoading) return;
+            LoadDataWithSpin();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var uploadControl = new upload();
+                uploadControl.Size = new Size(300, 600);
+
+                // 监听上传完成事件
+                uploadControl.UploadCompleted += (s, args) =>
+                {
+                    LoadDataWithSpin();
+                };
+
+                Form parentForm = GetParentForm();
+                if (parentForm != null)
+                {
+                    AntdUI.Drawer.open(parentForm, uploadControl, AntdUI.TAlignMini.Right);
+                }
+                else
+                {
+                    MessageBox.Show("无法找到父窗体", "错误",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"错误: {ex.Message}",
+                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void delbtn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var deleteControl = new delete();
+                deleteControl.Size = new Size(300, 300);
+
+                // 监听删除完成事件
+                deleteControl.DeleteCompleted += (s, args) =>
+                {
+                    LoadDataWithSpin();
+                };
+
+                Form parentForm = GetParentForm();
+                if (parentForm != null)
+                {
+                    AntdUI.Drawer.open(parentForm, deleteControl, AntdUI.TAlignMini.Right);
+                }
+                else
+                {
+                    MessageBox.Show("无法找到父窗体", "错误",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"错误: {ex.Message}",
+                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
 
-            // 获取当前行的数据对象
             var row = dataGridView1.Rows[e.RowIndex];
-
-            // 检查 Tag 是否包含 AppItem 对象
             if (row.Tag is not AppItem item)
             {
-                // 如果没有数据，可能是一个空行或占位行
                 if (e.ColumnIndex == dataGridView1.Columns["查看出处"].Index ||
                     e.ColumnIndex == dataGridView1.Columns["下载"].Index)
                 {
@@ -352,10 +512,8 @@ namespace SuperShop_Neko
             string link = item.链接;
             string source = item.出处;
 
-            // 处理按钮点击
             if (e.ColumnIndex == dataGridView1.Columns["查看出处"].Index)
             {
-                // 查看出处按钮 - 在浏览器中打开出处链接
                 if (!string.IsNullOrWhiteSpace(source))
                 {
                     try
@@ -387,7 +545,6 @@ namespace SuperShop_Neko
             }
             else if (e.ColumnIndex == dataGridView1.Columns["下载"].Index)
             {
-                // 下载按钮 - 在浏览器中打开下载链接
                 if (!string.IsNullOrWhiteSpace(link))
                 {
                     try
@@ -419,75 +576,45 @@ namespace SuperShop_Neko
             }
         }
 
-        // 上传按钮点击事件
-        private void button1_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var uploadControl = new upload();
-                uploadControl.Size = new Size(300, 600);
-
-                Form parentForm = GetParentForm();
-
-                if (parentForm != null)
-                {
-                    AntdUI.Drawer.open(parentForm, uploadControl, AntdUI.TAlignMini.Right);
-                }
-                else
-                {
-                    MessageBox.Show("无法找到父窗体", "错误",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"错误: {ex.Message}",
-                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // 删除按钮点击事件
-        private void delbtn_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var deleteControl = new delete();
-                deleteControl.Size = new Size(300, 300);
-
-                Form parentForm = GetParentForm();
-
-                if (parentForm != null)
-                {
-                    AntdUI.Drawer.open(parentForm, deleteControl, AntdUI.TAlignMini.Right);
-                }
-                else
-                {
-                    MessageBox.Show("无法找到父窗体", "错误",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"错误: {ex.Message}",
-                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // 刷新按钮点击事件 - 使用统一的 Spin 方法
-        private void reload_Click(object sender, EventArgs e)
-        {
-            if (isLoading) return;
-            LoadDataWithSpin();
-        }
-
-        // app_Load_1 事件
         private void app_Load_1(object sender, EventArgs e)
         {
-            // 同样使用统一的 Spin 方法
             LoadDataWithSpin();
         }
+        #endregion
 
-        // 获取父窗体
+        #region 辅助方法
+        private void BindDataToGridView()
+        {
+            try
+            {
+                dataGridView1.Rows.Clear();
+
+                foreach (var item in dataList)
+                {
+                    int rowIndex = dataGridView1.Rows.Add(
+                        item.软件名,
+                        item.链接,
+                        item.上传者,
+                        "查看出处",
+                        "下载"
+                    );
+                    dataGridView1.Rows[rowIndex].Tag = item;
+                }
+
+                if (dataGridView1.Rows.Count == 0)
+                {
+                    dataGridView1.Rows.Add("", "", "暂无数据", "", "");
+                    dataGridView1.Rows[0].DefaultCellStyle.ForeColor = Color.Gray;
+                    dataGridView1.Rows[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"数据显示失败: {ex.Message}", "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private Form GetParentForm()
         {
             Control control = this;
@@ -504,9 +631,6 @@ namespace SuperShop_Neko
             return Form.ActiveForm;
         }
 
-        /// <summary>
-        /// 刷新主题色（当配置改变时调用）
-        /// </summary>
         public void RefreshTheme()
         {
             LoadThemeColorConfig();
@@ -515,8 +639,9 @@ namespace SuperShop_Neko
                 ApplyThemeToButtons();
             }
         }
+        #endregion
 
-        // 数据类
+        #region 数据类
         public class AppItem
         {
             public string 软件名 { get; set; }
@@ -524,5 +649,6 @@ namespace SuperShop_Neko
             public string 上传者 { get; set; }
             public string 出处 { get; set; }
         }
+        #endregion
     }
 }

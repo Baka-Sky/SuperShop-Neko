@@ -5,26 +5,21 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using MySqlConnector;
+using System.Text.Json;
 
 namespace SuperShop_Neko
 {
     public partial class delete : UserControl
     {
-        // 数据库连接字符串（与upload.cs保持一致）
-        public static string mysqlcon = "server=api.baka233.top;database=supershop;user=sudabaka;password=jianghao0523;";
+        // 添加事件
+        public event EventHandler DeleteCompleted;
 
         public delete()
         {
             InitializeComponent();
         }
 
-        private void panel1_Click(object sender, EventArgs e)
-        {
-            // 保持原有的panel1点击事件
-        }
-
-        private void del_Click(object sender, EventArgs e)
+        private async void del_Click(object sender, EventArgs e)
         {
             // 检查输入框是否为空
             if (string.IsNullOrWhiteSpace(app.Text))
@@ -49,58 +44,113 @@ namespace SuperShop_Neko
 
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(mysqlcon))
+                // 显示加载状态
+                Cursor = Cursors.WaitCursor;
+                del.Enabled = false;
+
+                // 准备数据
+                var requestData = new Dictionary<string, string>
                 {
-                    connection.Open();
+                    { "软件名", app.Text.Trim() }
+                };
 
-                    // 先查询是否存在该软件
-                    string checkSql = "SELECT COUNT(*) FROM app WHERE 软件名 = @appName";
-                    using (MySqlCommand checkCommand = new MySqlCommand(checkSql, connection))
+                // 发送带鉴权的POST请求
+                var response = await AuthHelper.SendAuthPostRequest("/delete_app", requestData);
+
+                // 处理响应
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseText = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"删除响应: {responseText}");
+
+                    // 使用JsonDocument解析响应
+                    using (JsonDocument doc = JsonDocument.Parse(responseText))
                     {
-                        checkCommand.Parameters.AddWithValue("@appName", app.Text.Trim());
-                        long count = (long)checkCommand.ExecuteScalar();
+                        JsonElement root = doc.RootElement;
+                        bool success = root.TryGetProperty("success", out JsonElement successElement) && successElement.GetBoolean();
 
-                        if (count == 0)
+                        if (success)
                         {
-                            MessageBox.Show($"软件 '{app.Text}' 不存在！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            app.Focus();
-                            return;
-                        }
-                    }
-
-                    // 执行删除操作
-                    string deleteSql = "DELETE FROM app WHERE 软件名 = @appName";
-                    using (MySqlCommand deleteCommand = new MySqlCommand(deleteSql, connection))
-                    {
-                        deleteCommand.Parameters.AddWithValue("@appName", app.Text.Trim());
-
-                        int rowsAffected = deleteCommand.ExecuteNonQuery();
-
-                        if (rowsAffected > 0)
-                        {
-                            MessageBox.Show($"软件 '{app.Text}' 已成功删除！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show($"软件 '{app.Text}' 已成功删除！", "成功",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                             // 清空输入框
                             app.Clear();
+
+                            // 触发删除完成事件
+                            DeleteCompleted?.Invoke(this, EventArgs.Empty);
                         }
                         else
                         {
-                            MessageBox.Show("删除失败，请重试！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            string error = root.TryGetProperty("error", out JsonElement errorElement)
+                                ? errorElement.GetString()
+                                : "未知错误";
+                            if (root.TryGetProperty("error_code", out JsonElement errorCodeElement) &&
+                                errorCodeElement.GetString() == "APP_NOT_FOUND")
+                            {
+                                MessageBox.Show($"软件 '{app.Text}' 不存在！", "删除失败",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                            else
+                            {
+                                MessageBox.Show($"删除失败: {error}", "错误",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
                         }
                     }
                 }
-            }
-            catch (MySqlException ex)
-            {
-                MessageBox.Show($"数据库错误: {ex.Message}", "数据库错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else
+                {
+                    string errorText = await response.Content.ReadAsStringAsync();
+                    string errorMessage = $"API请求失败: {response.StatusCode}";
+
+                    try
+                    {
+                        using (JsonDocument doc = JsonDocument.Parse(errorText))
+                        {
+                            JsonElement root = doc.RootElement;
+                            if (root.TryGetProperty("error", out JsonElement errorElement))
+                            {
+                                errorMessage = errorElement.GetString();
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        errorMessage += $"\n响应: {errorText}";
+                    }
+
+                    MessageBox.Show(errorMessage, "错误",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"发生错误: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"发生错误: {ex.Message}", "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // 恢复控件状态
+                Cursor = Cursors.Default;
+                del.Enabled = true;
             }
         }
 
-        // 可选：添加一个按键事件，按Enter键触发删除
+        // 按Enter键触发删除
+        private void app_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                del_Click(sender, e);
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
 
+        private void panel1_Click(object sender, EventArgs e)
+        {
+            // 保持原有的panel1点击事件
         }
     }
+}
