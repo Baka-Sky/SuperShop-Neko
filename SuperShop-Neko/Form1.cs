@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
+using Windows.UI.Notifications;  // 这是关键
+using Windows.Data.Xml.Dom;
 
 namespace SuperShop_Neko
 {
@@ -67,6 +70,11 @@ namespace SuperShop_Neko
                 LoadWelcomePage(true);
                 _isInitialLoad = false;
             }));
+
+
+
+
+
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -765,6 +773,151 @@ namespace SuperShop_Neko
             System.Diagnostics.Process.GetCurrentProcess().Kill();
 
 
+        }
+
+        private void toast_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // 创建带有按钮的更新通知Toast
+                new ToastContentBuilder()
+                    .AddArgument("action", "update_notification")
+                    .AddArgument("current_version", "4.0.0")
+                    .AddArgument("target_version", "4.0.1")
+
+                    // 添加标题和内容
+                    .AddText("超级小铺又有新更新了！", hintMaxLines: 1)
+                    .AddText("当前版本: 4.0.0")
+                    .AddText("目标版本: 4.0.1")
+                    .AddText("是否更新？")
+
+                    // 添加按钮
+                    .AddButton(new ToastButton()
+                        .SetContent("更新!")
+                        .AddArgument("choice", "update_now")
+                        .AddArgument("from", "toast"))
+
+                    .AddButton(new ToastButton()
+                        .SetContent("让我想想")
+                        .AddArgument("choice", "update_later")
+                        .AddArgument("from", "toast"))
+
+                    // 设置显示时间
+                    .SetToastDuration(ToastDuration.Long)
+
+                    // 显示Toast并处理激活事件
+                    .Show(toast =>
+                    {
+                        toast.Tag = "update_notification";
+                        toast.Group = "super_shop_updates";
+
+                        // 订阅Toast激活事件
+                        toast.Activated += Toast_Activated;
+                    });
+            }
+            catch (Exception ex)
+            {
+                // 如果Toast失败，直接显示MessageBox
+                ShowUpdateMessageBox();
+            }
+        }
+
+        // Toast激活事件处理
+        private async void Toast_Activated(Windows.UI.Notifications.ToastNotification sender, object args)
+        {
+            try
+            {
+                // 解析参数
+                string arguments = string.Empty;
+
+                // 检查不同的参数获取方式
+                if (args is Windows.UI.Notifications.ToastActivatedEventArgs toastArgs)
+                {
+                    arguments = toastArgs.Arguments;
+                }
+                else
+                {
+                    // 尝试反射获取参数
+                    var property = args.GetType().GetProperty("Arguments");
+                    if (property != null)
+                    {
+                        arguments = property.GetValue(args)?.ToString() ?? "";
+                    }
+                }
+
+                // 延迟一下，确保Toast关闭
+                await System.Threading.Tasks.Task.Delay(100);
+
+                // 在主线程中显示消息框
+                this.Invoke(new Action(() =>
+                {
+                    if (!string.IsNullOrEmpty(arguments))
+                    {
+                        // 解析参数（格式如: "choice=update_now;from=toast"）
+                        var parameters = arguments.Split(';');
+                        string choice = "";
+
+                        foreach (var param in parameters)
+                        {
+                            var parts = param.Split('=');
+                            if (parts.Length == 2 && parts[0] == "choice")
+                            {
+                                choice = parts[1];
+                                break;
+                            }
+                        }
+
+                        if (choice == "update_now")
+                        {
+                            MessageBox.Show("您选择了【有更新】，开始更新流程...", "更新确认",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else if (choice == "update_later")
+                        {
+                            MessageBox.Show("您选择了【让我想想】，稍后可以再次检查更新。", "更新提醒",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                    else
+                    {
+                        // 如果没有参数，显示默认更新对话框
+                        ShowUpdateMessageBox();
+                    }
+                }));
+            }
+            catch (Exception ex)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    MessageBox.Show($"处理Toast点击时出错: {ex.Message}", "错误",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }));
+            }
+        }
+
+        // 备选方案：显示MessageBox
+        private void ShowUpdateMessageBox()
+        {
+            var result = MessageBox.Show(
+                "超级小铺又有新更新了！\n\n" +
+                "当前版本: 4.0.0\n" +
+                "目标版本: 4.0.1\n\n" +
+                "是否更新？",
+                "更新通知",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                MessageBox.Show("您选择了【有更新】，开始更新流程...", "更新确认",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("您选择了【让我想想】，稍后可以再次检查更新。", "更新提醒",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
     }
-}
+
 }

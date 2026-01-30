@@ -9,8 +9,8 @@ using System.IO;
 using System.Diagnostics;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
-
-
+using Microsoft.Toolkit.Uwp.Notifications;
+using Windows.UI.Notifications;
 
 namespace SuperShop_Neko
 {
@@ -422,10 +422,6 @@ namespace SuperShop_Neko
             }
         }
 
-
-
-
-
         private string[] ParseWeatherResponse(string xml)
         {
             try
@@ -629,6 +625,7 @@ namespace SuperShop_Neko
         }
 
         #endregion
+
 
         public void Dispose()
         {
