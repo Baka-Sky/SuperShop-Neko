@@ -7,6 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.IO;
 
 namespace SuperShop_Neko
 {
@@ -14,9 +16,125 @@ namespace SuperShop_Neko
     {
         public event EventHandler UploadCompleted;
 
+        // 当前用户的代称
+        private string currentUserUploaderName = "";
+
         public upload()
         {
             InitializeComponent();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            // 加载时直接从配置文件读取用户信息
+            LoadUserFromConfig();
+        }
+
+        // 从配置文件加载用户信息
+        private void LoadUserFromConfig()
+        {
+            try
+            {
+                // 配置文件路径
+                string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+
+                if (File.Exists(configPath))
+                {
+                    string jsonText = File.ReadAllText(configPath);
+                    using (JsonDocument doc = JsonDocument.Parse(jsonText))
+                    {
+                        JsonElement root = doc.RootElement;
+
+                        // 检查是否包含用户信息
+                        if (root.TryGetProperty("uploader_name", out JsonElement uploaderElement))
+                        {
+                            string uploaderName = uploaderElement.GetString();
+                            if (!string.IsNullOrEmpty(uploaderName))
+                            {
+                                currentUserUploaderName = uploaderName;
+                                UpdateUIForLoggedInUser();
+                                Console.WriteLine($"从配置文件读取到上传者代称: {currentUserUploaderName}");
+                                return;
+                            }
+                        }
+
+                        // 或者检查其他可能的属性名
+                        if (root.TryGetProperty("上传者代称", out JsonElement chineseNameElement))
+                        {
+                            string uploaderName = chineseNameElement.GetString();
+                            if (!string.IsNullOrEmpty(uploaderName))
+                            {
+                                currentUserUploaderName = uploaderName;
+                                UpdateUIForLoggedInUser();
+                                Console.WriteLine($"从配置文件读取到上传者代称(中文): {currentUserUploaderName}");
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // 如果没有找到配置或配置中没有上传者代称
+                Console.WriteLine("配置文件中未找到上传者代称信息");
+                UpdateUIForNotLoggedIn();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"读取配置文件失败: {ex.Message}");
+                UpdateUIForNotLoggedIn();
+            }
+        }
+
+        // 更新UI为已登录状态
+        private void UpdateUIForLoggedInUser()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(UpdateUIForLoggedInUser));
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(currentUserUploaderName))
+            {
+                who.Text = currentUserUploaderName;
+                who.ReadOnly = true;
+                who.BackColor = SystemColors.Control;
+                who.Enabled = true;
+                load.Enabled = true;
+                load.Text = "上传";
+
+                // 添加提示文本
+                if (who is AntdUI.Input antdInput)
+                {
+                    antdInput.PlaceholderText = "使用您的上传者代称";
+                }
+
+                Console.WriteLine($"UI已更新为已登录状态，上传者代称: {currentUserUploaderName}");
+            }
+            else
+            {
+                UpdateUIForNotLoggedIn();
+            }
+        }
+
+        // 更新UI为未登录状态
+        private void UpdateUIForNotLoggedIn()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(UpdateUIForNotLoggedIn));
+                return;
+            }
+
+            who.Text = "请先登录";
+            who.ReadOnly = true;
+            who.BackColor = SystemColors.Control;
+            who.Enabled = false;
+            load.Enabled = false;
+            load.Text = "请先登录";
+
+            Console.WriteLine("UI已更新为未登录状态");
         }
 
         // 检查软件名是否重复
@@ -108,27 +226,33 @@ namespace SuperShop_Neko
 
         private async void load_Click(object sender, EventArgs e)
         {
+            // 每次点击时都重新检查登录状态
+            LoadUserFromConfig();
+
+            // 检查是否已登录
+            if (string.IsNullOrEmpty(currentUserUploaderName))
+            {
+                MessageBox.Show("请先登录后再上传！", "提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             string softwareName = app.Text.Trim();
 
             // 检查必填字段是否为空
             if (string.IsNullOrWhiteSpace(softwareName))
             {
-                MessageBox.Show("请输入软件名！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("请输入软件名！", "提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 app.Focus();
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(dwntext.Text))
             {
-                MessageBox.Show("请输入下载链接！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("请输入下载链接！", "提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 dwntext.Focus();
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(who.Text))
-            {
-                MessageBox.Show("请输入上传者！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                who.Focus();
                 return;
             }
 
@@ -174,9 +298,11 @@ namespace SuperShop_Neko
                 {
                     { "软件名", softwareName },
                     { "链接", dwntext.Text.Trim() },
-                    { "上传者", who.Text.Trim() },
+                    { "上传者", currentUserUploaderName },  // 使用固定的上传者代称
                     { "出处", by.Text.Trim() }
                 };
+
+                Console.WriteLine($"发送上传请求 - 软件名: {softwareName}, 上传者: {currentUserUploaderName}");
 
                 var response = await AuthHelper.SendAuthPostRequest("/add_app", requestData);
 
@@ -193,12 +319,12 @@ namespace SuperShop_Neko
 
                         if (success)
                         {
-                            MessageBox.Show("上传成功！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show($"上传成功！\n软件名：{softwareName}\n上传者：{currentUserUploaderName}",
+                                "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                            // 清空输入框
+                            // 清空输入框（除了上传者）
                             app.Clear();
                             dwntext.Clear();
-                            who.Clear();
                             by.Clear();
 
                             // 触发上传完成事件
@@ -325,12 +451,33 @@ namespace SuperShop_Neko
 
         private void upload_Load(object sender, EventArgs e)
         {
-            // 初始化代码
+            // 保持原有的加载事件
         }
 
         private void panel2_Click(object sender, EventArgs e)
         {
             // 保持原有的panel2点击事件
+        }
+
+        // 提供一个方法，用于更新上传者代称（当用户登录或退出时调用）
+        public void UpdateUploaderName(string uploaderName)
+        {
+            currentUserUploaderName = uploaderName;
+
+            if (!string.IsNullOrEmpty(currentUserUploaderName))
+            {
+                UpdateUIForLoggedInUser();
+            }
+            else
+            {
+                UpdateUIForNotLoggedIn();
+            }
+        }
+
+        // 添加一个公共方法，供外部调用刷新状态
+        public void RefreshLoginStatus()
+        {
+            LoadUserFromConfig();
         }
     }
 }

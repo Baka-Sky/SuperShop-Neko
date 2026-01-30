@@ -6,13 +6,20 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Win32;
 
-
 namespace SuperShop_Neko
 {
     public class Config
     {
+        // 主题设置
         public bool color { get; set; }
         public string RGB { get; set; }
+
+        // 用户信息
+        public string name { get; set; } = "";
+        public string password { get; set; } = "";
+        public string user_id { get; set; } = "";
+        public string uploader_name { get; set; } = "";
+        public string su { get; set; } = "None";
 
         [JsonIgnore]
         public Color ThemeColor
@@ -53,7 +60,12 @@ namespace SuperShop_Neko
                 var defaultConfig = new Config
                 {
                     color = false,
-                    RGB = "0,0,0"
+                    RGB = "0,0,0",
+                    name = "",
+                    password = "",
+                    user_id = "",
+                    uploader_name = "",
+                    su = "None"
                 };
                 SaveConfig(defaultConfig);
             }
@@ -70,20 +82,42 @@ namespace SuperShop_Neko
 
                 if (config == null)
                 {
-                    config = new Config { color = false, RGB = "0,0,0" };
+                    config = new Config
+                    {
+                        color = false,
+                        RGB = "0,0,0",
+                        name = "",
+                        password = "",
+                        user_id = "",
+                        uploader_name = "",
+                        su = "None"
+                    };
                 }
-                else if (string.IsNullOrEmpty(config.RGB))
+                else
                 {
-                    config.RGB = "0,0,0";
+                    // 确保所有字段都有默认值
+                    config.name = config.name ?? "";
+                    config.password = config.password ?? "";
+                    config.user_id = config.user_id ?? "";
+                    config.uploader_name = config.uploader_name ?? "";
+                    config.su = config.su ?? "None";
+                    config.RGB = config.RGB ?? "0,0,0";
                 }
 
-                SaveConfig(config);
                 return config;
             }
             catch
             {
-                var defaultConfig = new Config { color = false, RGB = "0,0,0" };
-                SaveConfig(defaultConfig);
+                var defaultConfig = new Config
+                {
+                    color = false,
+                    RGB = "0,0,0",
+                    name = "",
+                    password = "",
+                    user_id = "",
+                    uploader_name = "",
+                    su = "None"
+                };
                 return defaultConfig;
             }
         }
@@ -95,7 +129,8 @@ namespace SuperShop_Neko
                 var options = new JsonSerializerOptions
                 {
                     WriteIndented = true,
-                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 };
 
                 string json = JsonSerializer.Serialize(config, options);
@@ -106,6 +141,67 @@ namespace SuperShop_Neko
                 // 保存失败，忽略错误
             }
         }
+
+        // 更新用户信息（不覆盖主题设置）
+        public static void UpdateUserInfo(string username, string password, string userId = "", string uploaderName = "", string su = "None")
+        {
+            var config = LoadConfig();
+            config.name = username;
+            config.password = password;
+
+            if (!string.IsNullOrEmpty(userId))
+                config.user_id = userId;
+
+            if (!string.IsNullOrEmpty(uploaderName))
+                config.uploader_name = uploaderName;
+
+            if (!string.IsNullOrEmpty(su))
+                config.su = su;
+
+            SaveConfig(config);
+        }
+
+        // 更新主题设置（不覆盖用户信息）
+        public static void UpdateTheme(bool useTheme, Color themeColor)
+        {
+            var config = LoadConfig();
+            config.color = useTheme;
+            config.ThemeColor = themeColor;
+            SaveConfig(config);
+        }
+
+        // 清除用户信息（保留主题设置）
+        public static void ClearUserInfo()
+        {
+            var config = LoadConfig();
+            config.name = "";
+            config.password = "";
+            config.user_id = "";
+            config.uploader_name = "";
+            config.su = "None";
+            SaveConfig(config);
+        }
+
+        // 获取当前用户信息
+        public static (string name, string password, string userId, string uploaderName, string su) GetCurrentUser()
+        {
+            var config = LoadConfig();
+            return (config.name, config.password, config.user_id, config.uploader_name, config.su);
+        }
+
+        // 检查是否有保存的用户
+        public static bool HasSavedUser()
+        {
+            var config = LoadConfig();
+            return !string.IsNullOrEmpty(config.name) && !string.IsNullOrEmpty(config.password);
+        }
+
+        // 检查是否是管理员
+        public static bool IsSuperUser()
+        {
+            var config = LoadConfig();
+            return config.su == "Super";
+        }
     }
 
     public static class WindowsThemeColorHelper
@@ -115,19 +211,14 @@ namespace SuperShop_Neko
         {
             try
             {
-                // 方法1: 获取现代Windows的主题色（Windows 10/11）
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\DWM"))
                 {
                     if (key != null)
                     {
-                        // 获取主题色（这是一个ABGR格式的整数）
                         var colorizationColor = key.GetValue("ColorizationColor")?.ToString();
                         if (!string.IsNullOrEmpty(colorizationColor) &&
                             int.TryParse(colorizationColor, out int colorValue))
                         {
-                            // ABGR格式转换为RGB
-                            // ABGR格式：AARRGGBB，需要转换为ARGB
-                            int a = (colorValue >> 24) & 0xFF;
                             int r = (colorValue >> 16) & 0xFF;
                             int g = (colorValue >> 8) & 0xFF;
                             int b = colorValue & 0xFF;
@@ -135,12 +226,10 @@ namespace SuperShop_Neko
                             return Color.FromArgb(r, g, b);
                         }
 
-                        // 获取主题色（另一种格式）
                         var colorizationColorBalance = key.GetValue("ColorizationColorBalance")?.ToString();
                         if (!string.IsNullOrEmpty(colorizationColorBalance) &&
                             int.TryParse(colorizationColorBalance, out int colorValue2))
                         {
-                            // 转换为RGB
                             return Color.FromArgb(
                                 (colorValue2 >> 16) & 0xFF,
                                 (colorValue2 >> 8) & 0xFF,
@@ -154,7 +243,6 @@ namespace SuperShop_Neko
 
             try
             {
-                // 方法2: 获取强调色（Windows 10/11）
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\Accent"))
                 {
                     if (key != null)
@@ -162,11 +250,10 @@ namespace SuperShop_Neko
                         var accentPalette = key.GetValue("AccentPalette") as byte[];
                         if (accentPalette != null && accentPalette.Length >= 32)
                         {
-                            // 强调色通常在偏移量0x1C处
                             return Color.FromArgb(
-                                accentPalette[28],  // R
-                                accentPalette[29],  // G
-                                accentPalette[30]   // B
+                                accentPalette[28],
+                                accentPalette[29],
+                                accentPalette[30]
                             );
                         }
                     }
@@ -176,7 +263,6 @@ namespace SuperShop_Neko
 
             try
             {
-                // 方法3: 获取活动窗口标题栏颜色（传统方法）
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Colors"))
                 {
                     if (key != null)
@@ -200,7 +286,6 @@ namespace SuperShop_Neko
 
             try
             {
-                // 方法4: 获取Windows主题文件中的颜色
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\History\Colors"))
                 {
                     if (key != null)
@@ -211,11 +296,10 @@ namespace SuperShop_Neko
                             var lastColor = key.GetValue(colorNames[colorNames.Length - 1])?.ToString();
                             if (!string.IsNullOrEmpty(lastColor) && lastColor.Length == 8)
                             {
-                                // ARGB十六进制格式
                                 return Color.FromArgb(
-                                    Convert.ToInt32(lastColor.Substring(2, 2), 16),  // R
-                                    Convert.ToInt32(lastColor.Substring(4, 2), 16),  // G
-                                    Convert.ToInt32(lastColor.Substring(6, 2), 16)   // B
+                                    Convert.ToInt32(lastColor.Substring(2, 2), 16),
+                                    Convert.ToInt32(lastColor.Substring(4, 2), 16),
+                                    Convert.ToInt32(lastColor.Substring(6, 2), 16)
                                 );
                             }
                         }
@@ -224,11 +308,9 @@ namespace SuperShop_Neko
             }
             catch { }
 
-            // 默认颜色
-            return Color.FromArgb(0, 120, 215); // Windows默认蓝色
+            return Color.FromArgb(0, 120, 215);
         }
 
-        // 获取主题颜色名称（如果有）
         public static string GetThemeColorName()
         {
             try
@@ -245,50 +327,6 @@ namespace SuperShop_Neko
             catch { }
 
             return "默认";
-        }
-    }
-
-    internal class hrartcore
-    {
-        // 这里可以添加 hrartcore 类的其他功能
-        public static void ApplyThemeColor(Color color)
-        {
-            // 应用主题色到UI的示例方法
-            // 你可以根据实际需求实现
-        }
-
-        public static Color GetThemeColorFromConfig()
-        {
-            var config = ConfigManager.LoadConfig();
-            return config.ThemeColor;
-        }
-
-        // 调试方法：显示所有注册表颜色值
-        public static string GetAllRegistryColors()
-        {
-            var result = new System.Text.StringBuilder();
-            result.AppendLine("注册表中的颜色值:");
-
-            try
-            {
-                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Colors"))
-                {
-                    if (key != null)
-                    {
-                        foreach (string valueName in key.GetValueNames())
-                        {
-                            var value = key.GetValue(valueName)?.ToString();
-                            result.AppendLine($"{valueName}: {value}");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                result.AppendLine($"读取失败: {ex.Message}");
-            }
-
-            return result.ToString();
         }
     }
 }

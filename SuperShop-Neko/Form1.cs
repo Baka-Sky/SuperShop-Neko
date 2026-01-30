@@ -6,7 +6,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Windows.UI.Notifications;  // 这是关键
+using Windows.UI.Notifications;
 using Windows.Data.Xml.Dom;
 
 namespace SuperShop_Neko
@@ -18,6 +18,7 @@ namespace SuperShop_Neko
         private app f2;
         private tools f3;
         private more f4;
+        private user f5;  // 新增user控件实例
         private bool _isInitialLoad = true;
 
         // 按钮颜色管理相关
@@ -32,11 +33,11 @@ namespace SuperShop_Neko
         private Color themeColor = Color.Empty;
         private bool useThemeColor = false;
 
-        // 所有按钮的列表
-        private List<AntdUI.Button> allButtons = new List<AntdUI.Button>();
+        // 所有AntdUI按钮的列表（不包括PictureBox）
+        private List<AntdUI.Button> allAntdButtons = new List<AntdUI.Button>();
 
         // 当前显示的页面类型
-        public enum PageType { Welcome, App, Tools, More, Set, About, AI }
+        public enum PageType { Welcome, App, Tools, More, Set, About, AI, User }
         private PageType currentPage = PageType.Welcome;
 
         public Form1()
@@ -55,8 +56,8 @@ namespace SuperShop_Neko
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // 收集所有按钮
-            CollectAllButtons();
+            // 收集所有AntdUI按钮
+            CollectAllAntdButtons();
 
             // 初始化控件但不立即显示
             InitializeControls();
@@ -70,11 +71,6 @@ namespace SuperShop_Neko
                 LoadWelcomePage(true);
                 _isInitialLoad = false;
             }));
-
-
-
-
-
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -83,18 +79,31 @@ namespace SuperShop_Neko
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
 
-
         /// <summary>
-        /// 收集所有按钮
+        /// 收集所有AntdUI按钮（不包括PictureBox）
         /// </summary>
-        private void CollectAllButtons()
+        private void CollectAllAntdButtons()
         {
-            // 收集所有导航按钮和功能按钮
-            allButtons = new List<AntdUI.Button>
-            {
-                homebtn, dwn, tools, more, // 导航按钮
-                button1, button2           // 功能按钮
-            };
+            // 收集所有AntdUI.Button类型的导航按钮
+            if (homebtn is AntdUI.Button)
+                allAntdButtons.Add(homebtn as AntdUI.Button);
+
+            if (dwn is AntdUI.Button)
+                allAntdButtons.Add(dwn as AntdUI.Button);
+
+            if (tools is AntdUI.Button)
+                allAntdButtons.Add(tools as AntdUI.Button);
+
+            if (more is AntdUI.Button)
+                allAntdButtons.Add(more as AntdUI.Button);
+
+            if (button1 is AntdUI.Button)
+                allAntdButtons.Add(button1 as AntdUI.Button);
+
+            if (button2 is AntdUI.Button)
+                allAntdButtons.Add(button2 as AntdUI.Button);
+
+            // 注意：user是PictureBox，不是AntdUI.Button，所以不加入
         }
 
         /// <summary>
@@ -159,7 +168,7 @@ namespace SuperShop_Neko
 
             try
             {
-                foreach (var button in allButtons)
+                foreach (var button in allAntdButtons)
                 {
                     if (button != null)
                     {
@@ -342,10 +351,14 @@ namespace SuperShop_Neko
             f4 = new more();
             f4.Visible = false;
 
+            // 初始化user控件
+            f5 = new user();
+            f5.Visible = false;
+
             // 订阅more控件的事件
             f4.OnSwitchToAbout += F4_OnSwitchToAbout;
             f4.OnSwitchToSet += F4_OnSwitchToSet;
-            f4.OnSwitchToAI += F4_OnSwitchToAI;  // 新增AI事件订阅
+            f4.OnSwitchToAI += F4_OnSwitchToAI;
         }
 
         private void LoadWelcomePage(bool isInitialLoad = false)
@@ -356,7 +369,7 @@ namespace SuperShop_Neko
             shop.Controls.Add(f1);
             FuckWelcomeHDPI.FixWelcomeOnly(shop, f1, isInitialLoad);
 
-            UpdateButtonColors(homebtn);
+            UpdateButtonColors(homebtn as AntdUI.Button);
             currentPage = PageType.Welcome;
         }
 
@@ -383,7 +396,7 @@ namespace SuperShop_Neko
                 f2.Invalidate();
                 f2.Update();
 
-                UpdateButtonColors(dwn);
+                UpdateButtonColors(dwn as AntdUI.Button);
                 currentPage = PageType.App;
             }
             finally
@@ -415,7 +428,7 @@ namespace SuperShop_Neko
                 f3.Invalidate();
                 f3.Update();
 
-                UpdateButtonColors(tools);
+                UpdateButtonColors(tools as AntdUI.Button);
                 currentPage = PageType.Tools;
             }
             finally
@@ -438,7 +451,7 @@ namespace SuperShop_Neko
                     f4 = new more();
                     f4.OnSwitchToAbout += F4_OnSwitchToAbout;
                     f4.OnSwitchToSet += F4_OnSwitchToSet;
-                    f4.OnSwitchToAI += F4_OnSwitchToAI;  // 新增AI事件订阅
+                    f4.OnSwitchToAI += F4_OnSwitchToAI;
                 }
 
                 f4.Visible = false;
@@ -453,12 +466,78 @@ namespace SuperShop_Neko
                 f4.Invalidate();
                 f4.Update();
 
-                UpdateButtonColors(more);
+                UpdateButtonColors(more as AntdUI.Button);
                 currentPage = PageType.More;
             }
             finally
             {
                 shop.ResumeLayout(true);
+            }
+        }
+
+        /// <summary>
+        /// 加载User页面
+        /// </summary>
+        private void LoadUserPage()
+        {
+            if (shop == null) return;
+
+            shop.SuspendLayout();
+            try
+            {
+                shop.Controls.Clear();
+
+                if (f5 == null)
+                {
+                    f5 = new user();
+                }
+
+                f5.Visible = false;
+                f5.Dock = DockStyle.Fill;
+                f5.Size = shop.ClientSize;
+                f5.Location = new Point(0, 0);
+
+                shop.Controls.Add(f5);
+                f5.Visible = true;
+
+                shop.PerformLayout();
+                f5.Invalidate();
+                f5.Update();
+
+                // user是PictureBox，不参与按钮颜色管理
+                // 只需要将其他按钮设为非激活状态
+                SetAllButtonsToInactive();
+                currentPage = PageType.User;
+            }
+            finally
+            {
+                shop.ResumeLayout(true);
+            }
+        }
+
+        /// <summary>
+        /// 设置所有按钮为非激活状态
+        /// </summary>
+        private void SetAllButtonsToInactive()
+        {
+            currentActiveButton = null;
+
+            foreach (var button in allAntdButtons)
+            {
+                if (button != null)
+                {
+                    if (useThemeColor && themeColor != Color.Empty)
+                    {
+                        // 使用主题色
+                        ApplyColorToButton(button, themeColor);
+                    }
+                    else
+                    {
+                        // 重置为默认颜色
+                        ResetButtonToDefault(button);
+                    }
+                    button.Invalidate();
+                }
             }
         }
 
@@ -482,9 +561,12 @@ namespace SuperShop_Neko
                 shop.Controls.Add(aboutControl);
 
                 // 更新按钮状态
-                more.BackColor = activeButtonColor;
-                more.DefaultBack = activeButtonColor;
-                more.Invalidate();
+                if (more is AntdUI.Button moreButton)
+                {
+                    moreButton.BackColor = activeButtonColor;
+                    moreButton.DefaultBack = activeButtonColor;
+                    moreButton.Invalidate();
+                }
 
                 shop.ResumeLayout(true);
                 shop.Invalidate();
@@ -517,15 +599,15 @@ namespace SuperShop_Neko
                 setControl.Size = shop.ClientSize;
                 setControl.Location = new Point(0, 0);
 
-                // 传递Form1的引用，以便set控件可以调用RefreshButtonColors
-                // 如果set控件需要这个功能，可以在set类中添加一个Form1属性
-
                 shop.Controls.Add(setControl);
 
                 // 更新按钮状态
-                more.BackColor = activeButtonColor;
-                more.DefaultBack = activeButtonColor;
-                more.Invalidate();
+                if (more is AntdUI.Button moreButton)
+                {
+                    moreButton.BackColor = activeButtonColor;
+                    moreButton.DefaultBack = activeButtonColor;
+                    moreButton.Invalidate();
+                }
 
                 shop.ResumeLayout(true);
                 shop.Invalidate();
@@ -553,7 +635,7 @@ namespace SuperShop_Neko
                 shop.SuspendLayout();
                 shop.Controls.Clear();
 
-                ai aiControl = new ai();  // 创建ai控件
+                ai aiControl = new ai();
                 aiControl.Dock = DockStyle.Fill;
                 aiControl.Size = shop.ClientSize;
                 aiControl.Location = new Point(0, 0);
@@ -561,9 +643,12 @@ namespace SuperShop_Neko
                 shop.Controls.Add(aiControl);
 
                 // 更新按钮状态
-                more.BackColor = activeButtonColor;
-                more.DefaultBack = activeButtonColor;
-                more.Invalidate();
+                if (more is AntdUI.Button moreButton)
+                {
+                    moreButton.BackColor = activeButtonColor;
+                    moreButton.DefaultBack = activeButtonColor;
+                    moreButton.Invalidate();
+                }
 
                 shop.ResumeLayout(true);
                 shop.Invalidate();
@@ -625,13 +710,21 @@ namespace SuperShop_Neko
         }
 
         /// <summary>
+        /// USER按钮点击事件
+        /// </summary>
+        private void user_Click(object sender, EventArgs e)
+        {
+            LoadUserPage();
+        }
+
+        /// <summary>
         /// 更新所有按钮的颜色（当前激活的按钮变蓝，其他根据主题色设置）
         /// </summary>
         private void UpdateButtonColors(AntdUI.Button activeButton)
         {
             currentActiveButton = activeButton;
 
-            foreach (var button in allButtons)
+            foreach (var button in allAntdButtons)
             {
                 if (button != null)
                 {
@@ -675,7 +768,7 @@ namespace SuperShop_Neko
         }
 
         /// <summary>
-        /// 重置单个按钮为默认颜色   Do you like wan you see♂
+        /// 重置单个按钮为默认颜色
         /// </summary>
         private void ResetButtonToDefault(AntdUI.Button button)
         {
@@ -743,6 +836,11 @@ namespace SuperShop_Neko
                 {
                     UpdateButtonColors(currentActiveButton);
                 }
+                else
+                {
+                    // 如果没有激活按钮，将所有按钮设为非激活状态
+                    SetAllButtonsToInactive();
+                }
             }
             catch
             {
@@ -768,11 +866,8 @@ namespace SuperShop_Neko
 
         private void Form1_FormClosing_1(object sender, FormClosingEventArgs e)
         {
-
             // 立即终止整个进程
             System.Diagnostics.Process.GetCurrentProcess().Kill();
-
-
         }
 
         private void toast_Click(object sender, EventArgs e)
@@ -919,5 +1014,4 @@ namespace SuperShop_Neko
             }
         }
     }
-
 }

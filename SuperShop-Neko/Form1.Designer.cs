@@ -30,7 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             page = new AntdUI.PageHeader();
-            pictureBox1 = new PictureBox();
+            toast = new AntdUI.Button();
+            user = new PictureBox();
             button2 = new AntdUI.Button();
             button1 = new AntdUI.Button();
             labelTime1 = new AntdUI.LabelTime();
@@ -40,9 +41,8 @@
             dwn = new AntdUI.Button();
             homebtn = new AntdUI.Button();
             shop = new AntdUI.Panel();
-            toast = new AntdUI.Button();
             page.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)user).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -50,7 +50,7 @@
             // 
             page.BackColor = Color.FromArgb(255, 224, 192);
             page.Controls.Add(toast);
-            page.Controls.Add(pictureBox1);
+            page.Controls.Add(user);
             page.Controls.Add(button2);
             page.Controls.Add(button1);
             page.Controls.Add(labelTime1);
@@ -63,15 +63,25 @@
             page.TabIndex = 0;
             page.Text = "超级小铺Neko";
             // 
-            // pictureBox1
+            // toast
             // 
-            pictureBox1.Image = Properties.Resources.用户__1_;
-            pictureBox1.Location = new Point(621, 9);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(20, 20);
-            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-            pictureBox1.TabIndex = 3;
-            pictureBox1.TabStop = false;
+            toast.Location = new Point(379, 0);
+            toast.Name = "toast";
+            toast.Size = new Size(151, 41);
+            toast.TabIndex = 4;
+            toast.Text = "测试Toast通知";
+            toast.Click += toast_Click;
+            // 
+            // user
+            // 
+            user.Image = Properties.Resources.用户__1_;
+            user.Location = new Point(621, 9);
+            user.Name = "user";
+            user.Size = new Size(20, 20);
+            user.SizeMode = PictureBoxSizeMode.Zoom;
+            user.TabIndex = 3;
+            user.TabStop = false;
+            user.Click += user_Click;
             // 
             // button2
             // 
@@ -159,15 +169,6 @@
             shop.TabIndex = 2;
             shop.Text = "shop";
             // 
-            // toast
-            // 
-            toast.Location = new Point(379, 0);
-            toast.Name = "toast";
-            toast.Size = new Size(151, 41);
-            toast.TabIndex = 4;
-            toast.Text = "测试Toast通知";
-            toast.Click += toast_Click;
-            // 
             // Form1
             // 
             AutoScaleMode = AutoScaleMode.Inherit;
@@ -183,7 +184,7 @@
             Text = "超级小铺";
             FormClosing += Form1_FormClosing_1;
             page.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)user).EndInit();
             panel1.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -200,7 +201,7 @@
         private AntdUI.LabelTime labelTime1;
         private AntdUI.Button button1;
         private AntdUI.Button button2;
-        private PictureBox pictureBox1;
+        private PictureBox user;
         private AntdUI.Button toast;
     }
 }
