@@ -9,6 +9,9 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Platforms>x64</Platforms>
+		
+		<DebugType Condition="'$(Configuration)'=='Release'">pdbonly</DebugType>
+		<DebugSymbols Condition="'$(Configuration)'=='Release'">true</DebugSymbols>
 
 		<!-- 独立发布配置：打包.NET运行时 -->
 		<SelfContained>true</SelfContained>
