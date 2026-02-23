@@ -42,8 +42,6 @@ namespace SuperShop_Neko
             Debug.WriteLine("[set] 开始收集按钮");
 
             // 将所有AntdUI.Button按钮添加到列表中
-            // 注意：这里需要根据您的设计器中的实际按钮名称来添加
-            // 假设您有以下按钮：clean, 以及可能还有其他按钮
             allButtons = new List<AntdUI.Button>
             {
                 clean
@@ -273,12 +271,6 @@ namespace SuperShop_Neko
                 // 设置Switch的初始状态
                 color.Checked = config.color;
 
-                // 如果是true，静默获取主题色
-                if (config.color)
-                {
-                    SilentUpdateThemeColor();
-                }
-
                 // 加载主题色配置
                 LoadThemeColorConfig();
             }
@@ -288,23 +280,50 @@ namespace SuperShop_Neko
             }
         }
 
-        // 静默更新主题色
-        private void SilentUpdateThemeColor()
+        /// <summary>
+        /// 只更新颜色相关的配置，不覆盖其他字段
+        /// </summary>
+        private void UpdateColorConfigOnly(bool colorEnabled, Color newColor)
         {
             try
             {
-                // 从注册表获取Windows主题色
-                Color themeColor = WindowsThemeColorHelper.GetWindowsThemeColor();
+                string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
 
-                // 更新配置
-                config.ThemeColor = themeColor;
+                // 读取现有配置
+                Dictionary<string, object> configDict;
+                if (File.Exists(configPath))
+                {
+                    string json = File.ReadAllText(configPath);
+                    configDict = JsonSerializer.Deserialize<Dictionary<string, object>>(json)
+                        ?? new Dictionary<string, object>();
+                }
+                else
+                {
+                    configDict = new Dictionary<string, object>();
+                }
 
-                // 保存配置
-                ConfigManager.SaveConfig(config);
+                // 更新颜色相关字段
+                configDict["color"] = colorEnabled;
+                configDict["RGB"] = $"{newColor.R},{newColor.G},{newColor.B}";
+
+                // 保留所有其他字段不变
+                // Version, name, password, user_id, uploader_name, su 等字段都保持不变
+
+                // 写回文件
+                string newJson = JsonSerializer.Serialize(configDict, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+                File.WriteAllText(configPath, newJson);
+
+                Debug.WriteLine($"[set] 颜色配置已更新: color={colorEnabled}, RGB={newColor.R},{newColor.G},{newColor.B}");
+
+                // 重新加载配置
+                config = ConfigManager.LoadConfig();
             }
-            catch
+            catch (Exception ex)
             {
-                // 静默失败
+                Debug.WriteLine($"[set] 更新颜色配置失败: {ex.Message}");
             }
         }
 
@@ -315,28 +334,25 @@ namespace SuperShop_Neko
 
             try
             {
-                // 更新配置
-                config.color = e.Value;
-
                 if (e.Value) // 如果开关打开
                 {
-                    // 获取主题色
-                    SilentUpdateThemeColor();
+                    // 获取Windows主题色
+                    Color newColor = WindowsThemeColorHelper.GetWindowsThemeColor();
+
+                    // 只更新颜色相关配置
+                    UpdateColorConfigOnly(true, newColor);
+
+                    // 强制立即应用主题色
+                    ForceApplyThemeColorImmediately();
                 }
                 else
                 {
-                    // 关闭时重置为黑色
-                    config.RGB = "0,0,0";
+                    // 关闭时设置为黑色
+                    UpdateColorConfigOnly(false, Color.Black);
+
+                    // 强制立即应用主题色
+                    ForceApplyThemeColorImmediately();
                 }
-
-                // 保存配置
-                ConfigManager.SaveConfig(config);
-
-                // 立即重新加载配置，确保获取到最新的RGB值
-                config = ConfigManager.LoadConfig();
-
-                // 强制立即应用主题色到所有按钮
-                ForceApplyThemeColorImmediately();
             }
             catch (Exception ex)
             {
