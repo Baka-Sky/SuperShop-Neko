@@ -245,8 +245,8 @@ namespace SuperShop_Neko
                                 currentUserId = newUserId;
                                 currentUserSu = suValue;
 
-                                // 更新配置中的用户信息
-                                ConfigManager.UpdateUserInfo(userName, pwd, newUserId, newUploaderName, suValue);
+                                // 只更新用户相关配置
+                                UpdateUserConfigOnly(userName, pwd, newUserId, newUploaderName, suValue);
 
                                 // 显示用户信息，隐藏登录控件
                                 ShowUserInfo();
@@ -278,18 +278,50 @@ namespace SuperShop_Neko
             }
         }
 
-        // 保存用户配置
-        private void SaveUserConfig(string username, string userPassword = "", string userId = "", string uploaderName = "", string su = "None")
+        /// <summary>
+        /// 只更新用户相关的配置，不覆盖其他字段
+        /// </summary>
+        private void UpdateUserConfigOnly(string username, string password, string userId, string uploaderName, string su)
         {
             try
             {
-                ConfigManager.UpdateUserInfo(username, userPassword, userId, uploaderName, su);
-                DebugInfo($"用户配置已保存: {username}");
+                string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+
+                // 读取现有配置
+                Dictionary<string, object> configDict;
+                if (File.Exists(configPath))
+                {
+                    string json = File.ReadAllText(configPath);
+                    configDict = JsonSerializer.Deserialize<Dictionary<string, object>>(json)
+                        ?? new Dictionary<string, object>();
+                }
+                else
+                {
+                    configDict = new Dictionary<string, object>();
+                }
+
+                // 更新用户相关字段
+                configDict["name"] = username;
+                configDict["password"] = password;
+                configDict["user_id"] = userId;
+                configDict["uploader_name"] = uploaderName;
+                configDict["su"] = su;
+
+                // 保留所有其他字段不变
+                // color, RGB, Version 等字段都保持不变
+
+                // 写回文件
+                string newJson = JsonSerializer.Serialize(configDict, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+                File.WriteAllText(configPath, newJson);
+
+                DebugInfo($"用户配置已更新: {username}, su={su}");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"保存配置失败: {ex.Message}", "错误",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DebugInfo($"更新用户配置失败: {ex.Message}");
             }
         }
 
@@ -435,8 +467,8 @@ namespace SuperShop_Neko
                                 currentUserId = userId;
                                 currentUserSu = suValue;
 
-                                // 保存用户配置
-                                SaveUserConfig(username, userPassword, userId, uploaderName, suValue);
+                                // 只更新用户相关配置
+                                UpdateUserConfigOnly(username, userPassword, userId, uploaderName, suValue);
 
                                 // 显示用户信息，隐藏登录控件
                                 ShowUserInfo();
@@ -603,7 +635,7 @@ namespace SuperShop_Neko
             DebugInfo("用户信息已清空");
 
             // 清除配置中的用户信息
-            ConfigManager.ClearUserInfo();
+            ClearUserConfigOnly();
             DebugInfo("配置信息已清除");
 
             // 清空输入框
@@ -630,6 +662,52 @@ namespace SuperShop_Neko
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             DebugInfo("退出登录完成");
+        }
+
+        /// <summary>
+        /// 只清除用户相关的配置，不覆盖其他字段
+        /// </summary>
+        private void ClearUserConfigOnly()
+        {
+            try
+            {
+                string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+
+                // 读取现有配置
+                Dictionary<string, object> configDict;
+                if (File.Exists(configPath))
+                {
+                    string json = File.ReadAllText(configPath);
+                    configDict = JsonSerializer.Deserialize<Dictionary<string, object>>(json)
+                        ?? new Dictionary<string, object>();
+                }
+                else
+                {
+                    configDict = new Dictionary<string, object>();
+                }
+
+                // 清空用户相关字段
+                configDict["name"] = "";
+                configDict["password"] = "";
+                configDict["user_id"] = "";
+                configDict["uploader_name"] = "";
+                configDict["su"] = "None";
+
+                // 保留所有其他字段不变
+
+                // 写回文件
+                string newJson = JsonSerializer.Serialize(configDict, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+                File.WriteAllText(configPath, newJson);
+
+                DebugInfo("用户配置已清除");
+            }
+            catch (Exception ex)
+            {
+                DebugInfo($"清除用户配置失败: {ex.Message}");
+            }
         }
 
         // 注册按钮点击事件
