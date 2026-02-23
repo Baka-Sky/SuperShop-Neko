@@ -30,10 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             page = new AntdUI.PageHeader();
-            toast = new AntdUI.Button();
             user = new PictureBox();
-            button2 = new AntdUI.Button();
-            button1 = new AntdUI.Button();
             labelTime1 = new AntdUI.LabelTime();
             panel1 = new AntdUI.Panel();
             more = new AntdUI.Button();
@@ -49,10 +46,7 @@
             // page
             // 
             page.BackColor = Color.FromArgb(255, 224, 192);
-            page.Controls.Add(toast);
             page.Controls.Add(user);
-            page.Controls.Add(button2);
-            page.Controls.Add(button1);
             page.Controls.Add(labelTime1);
             page.Location = new Point(1, 1);
             page.MaximizeBox = false;
@@ -62,15 +56,6 @@
             page.Size = new Size(892, 38);
             page.TabIndex = 0;
             page.Text = "超级小铺Neko";
-            // 
-            // toast
-            // 
-            toast.Location = new Point(379, 0);
-            toast.Name = "toast";
-            toast.Size = new Size(151, 41);
-            toast.TabIndex = 4;
-            toast.Text = "测试Toast通知";
-            toast.Click += toast_Click;
             // 
             // user
             // 
@@ -82,24 +67,6 @@
             user.TabIndex = 3;
             user.TabStop = false;
             user.Click += user_Click;
-            // 
-            // button2
-            // 
-            button2.Location = new Point(279, 0);
-            button2.Name = "button2";
-            button2.Size = new Size(94, 41);
-            button2.TabIndex = 2;
-            button2.Text = "卡-30s";
-            button2.Click += button2_Click;
-            // 
-            // button1
-            // 
-            button1.Location = new Point(163, 0);
-            button1.Name = "button1";
-            button1.Size = new Size(110, 41);
-            button1.TabIndex = 1;
-            button1.Text = "炸-Superdie";
-            button1.Click += button1_Click;
             // 
             // labelTime1
             // 
@@ -199,9 +166,6 @@
         private AntdUI.Button homebtn;
         public AntdUI.Panel shop;
         private AntdUI.LabelTime labelTime1;
-        private AntdUI.Button button1;
-        private AntdUI.Button button2;
         private PictureBox user;
-        private AntdUI.Button toast;
     }
 }

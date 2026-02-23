@@ -97,11 +97,7 @@ namespace SuperShop_Neko
             if (more is AntdUI.Button)
                 allAntdButtons.Add(more as AntdUI.Button);
 
-            if (button1 is AntdUI.Button)
-                allAntdButtons.Add(button1 as AntdUI.Button);
 
-            if (button2 is AntdUI.Button)
-                allAntdButtons.Add(button2 as AntdUI.Button);
 
             // 注意：user是PictureBox，不是AntdUI.Button，所以不加入
         }

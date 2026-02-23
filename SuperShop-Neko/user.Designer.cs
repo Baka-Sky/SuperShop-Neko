@@ -70,7 +70,6 @@
             userid.Size = new Size(486, 29);
             userid.TabIndex = 2;
             userid.Text = "UserID:";
-            
             // 
             // label4
             // 
@@ -89,7 +88,6 @@
             ifsu.Size = new Size(281, 29);
             ifsu.TabIndex = 4;
             ifsu.Text = "权限为:XXX";
-
             // 
             // userpanel
             // 
@@ -110,7 +108,7 @@
             reg.Name = "reg";
             reg.Size = new Size(176, 37);
             reg.TabIndex = 8;
-            reg.Text = "Reg";
+            reg.Text = "注册";
             reg.Click += reg_Click;
             // 
             // login
@@ -119,7 +117,7 @@
             login.Name = "login";
             login.Size = new Size(181, 37);
             login.TabIndex = 7;
-            login.Text = "login";
+            login.Text = "登录";
             login.Click += login_Click;
             // 
             // password
@@ -128,7 +126,6 @@
             password.Name = "password";
             password.Size = new Size(385, 50);
             password.TabIndex = 2;
-            password.Text = "password";
             // 
             // who
             // 
@@ -136,7 +133,6 @@
             who.Name = "who";
             who.Size = new Size(385, 50);
             who.TabIndex = 1;
-            who.Text = "who";
             // 
             // label6
             // 
