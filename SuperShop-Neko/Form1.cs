@@ -1112,5 +1112,10 @@ namespace SuperShop_Neko
                 ShowUpdateMessageBox("4.0.1");
             }
         }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Process.GetCurrentProcess().Kill();
+        }
     }
 }
