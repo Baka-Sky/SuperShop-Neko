@@ -1,15 +1,13 @@
-﻿using System;
+﻿using AntdUI;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
-using System.Text;
+using System.IO;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Net.Http;
-using System.IO;
-using AntdUI;
 
 namespace SuperShop_Neko
 {
@@ -25,23 +23,10 @@ namespace SuperShop_Neko
         public app()
         {
             InitializeComponent();
-            InitializeDataGridView();
             LoadThemeColorConfig();
         }
 
         #region 初始化方法
-        private void InitializeDataGridView()
-        {
-            dataGridView1.AllowUserToAddRows = false;
-            dataGridView1.AllowUserToDeleteRows = false;
-            dataGridView1.ReadOnly = true;
-            dataGridView1.RowHeadersVisible = false;
-            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            查看出处.UseColumnTextForButtonValue = true;
-            下载.UseColumnTextForButtonValue = true;
-            dataGridView1.CellClick += DataGridView1_CellClick;
-        }
-
         private void LoadThemeColorConfig()
         {
             try
@@ -89,7 +74,6 @@ namespace SuperShop_Neko
                 ApplyColorToButton(upbutton, themeColor);
                 ApplyColorToButton(delbtn, themeColor);
                 ApplyColorToButton(reload, themeColor);
-                ApplyThemeToDataGridView();
             }
             catch { }
         }
@@ -110,34 +94,6 @@ namespace SuperShop_Neko
                     );
                     antdButton.BackHover = hoverColor;
                     antdButton.Invalidate();
-                }
-                else if (button is System.Windows.Forms.Button winButton)
-                {
-                    winButton.BackColor = color;
-                    winButton.Invalidate();
-                }
-            }
-            catch { }
-        }
-
-        private void ApplyThemeToDataGridView()
-        {
-            try
-            {
-                if (useThemeColor && themeColor != Color.Empty)
-                {
-                    dataGridView1.RowsDefaultCellStyle.BackColor = Color.White;
-                    dataGridView1.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(245, 245, 245);
-                    dataGridView1.ColumnHeadersDefaultCellStyle.BackColor = themeColor;
-                    dataGridView1.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-                    dataGridView1.ColumnHeadersDefaultCellStyle.Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Bold);
-                    dataGridView1.RowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(
-                        Math.Min(themeColor.R + 40, 255),
-                        Math.Min(themeColor.G + 40, 255),
-                        Math.Min(themeColor.B + 40, 255)
-                    );
-                    dataGridView1.RowsDefaultCellStyle.SelectionForeColor = Color.White;
-                    dataGridView1.Invalidate();
                 }
             }
             catch { }
@@ -183,7 +139,6 @@ namespace SuperShop_Neko
                         string errorText = await response.Content.ReadAsStringAsync();
                         config.Text = "请求失败";
 
-                        // 尝试解析错误信息
                         string errorMessage = $"HTTP错误: {response.StatusCode}";
                         try
                         {
@@ -209,8 +164,6 @@ namespace SuperShop_Neko
                     }
 
                     string responseText = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"API响应: {responseText}");
-
                     using (JsonDocument doc = JsonDocument.Parse(responseText))
                     {
                         JsonElement root = doc.RootElement;
@@ -297,7 +250,6 @@ namespace SuperShop_Neko
 
                 var response = await AuthHelper.SendAuthPostRequest("/add_app", appData);
                 string responseText = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"添加应用响应: {responseText}");
 
                 using (JsonDocument doc = JsonDocument.Parse(responseText))
                 {
@@ -338,7 +290,6 @@ namespace SuperShop_Neko
 
                 var response = await AuthHelper.SendAuthPostRequest("/delete_app", deleteData);
                 string responseText = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"删除应用响应: {responseText}");
 
                 using (JsonDocument doc = JsonDocument.Parse(responseText))
                 {
@@ -383,7 +334,6 @@ namespace SuperShop_Neko
 
                 var response = await AuthHelper.SendAuthPostRequest("/update_app", updateData);
                 string responseText = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"更新应用响应: {responseText}");
 
                 using (JsonDocument doc = JsonDocument.Parse(responseText))
                 {
@@ -422,6 +372,7 @@ namespace SuperShop_Neko
                 ApplyThemeToButtons();
             }
             LoadDataWithSpin();
+            SmallPanel.Hide();
         }
 
         private void reload_Click(object sender, EventArgs e)
@@ -437,7 +388,6 @@ namespace SuperShop_Neko
                 var uploadControl = new upload();
                 uploadControl.Size = new Size(300, 600);
 
-                // 监听上传完成事件
                 uploadControl.UploadCompleted += (s, args) =>
                 {
                     LoadDataWithSpin();
@@ -456,8 +406,7 @@ namespace SuperShop_Neko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"错误: {ex.Message}",
-                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"错误: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -468,7 +417,6 @@ namespace SuperShop_Neko
                 var deleteControl = new delete();
                 deleteControl.Size = new Size(300, 300);
 
-                // 监听删除完成事件
                 deleteControl.DeleteCompleted += (s, args) =>
                 {
                     LoadDataWithSpin();
@@ -487,98 +435,8 @@ namespace SuperShop_Neko
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"错误: {ex.Message}",
-                    "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"错误: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
-
-            var row = dataGridView1.Rows[e.RowIndex];
-            if (row.Tag is not AppItem item)
-            {
-                if (e.ColumnIndex == dataGridView1.Columns["查看出处"].Index ||
-                    e.ColumnIndex == dataGridView1.Columns["下载"].Index)
-                {
-                    MessageBox.Show("此行为空数据行，无法执行操作", "提示",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                return;
-            }
-
-            string softwareName = item.软件名;
-            string link = item.链接;
-            string source = item.出处;
-
-            if (e.ColumnIndex == dataGridView1.Columns["查看出处"].Index)
-            {
-                if (!string.IsNullOrWhiteSpace(source))
-                {
-                    try
-                    {
-                        string urlToOpen = source;
-                        if (!urlToOpen.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-                            !urlToOpen.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-                        {
-                            urlToOpen = "http://" + urlToOpen;
-                        }
-
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = urlToOpen,
-                            UseShellExecute = true
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"无法打开出处链接: {ex.Message}\n链接: {source}",
-                            "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show($"软件 '{softwareName}' 没有出处链接", "提示",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-            else if (e.ColumnIndex == dataGridView1.Columns["下载"].Index)
-            {
-                if (!string.IsNullOrWhiteSpace(link))
-                {
-                    try
-                    {
-                        string urlToOpen = link;
-                        if (!urlToOpen.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-                            !urlToOpen.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-                        {
-                            urlToOpen = "http://" + urlToOpen;
-                        }
-
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = urlToOpen,
-                            UseShellExecute = true
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"无法打开下载链接: {ex.Message}\n链接: {link}",
-                            "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show($"软件 '{softwareName}' 没有下载链接", "提示",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-        }
-
-        private void app_Load_1(object sender, EventArgs e)
-        {
-            LoadDataWithSpin();
         }
         #endregion
 
@@ -587,31 +445,128 @@ namespace SuperShop_Neko
         {
             try
             {
-                dataGridView1.Rows.Clear();
+                SuperPanel.Controls.Clear();
+                SuperPanel.AutoScroll = true;
+                SuperPanel.HorizontalScroll.Visible = false;
+
+                int itemWidth = SmallPanel.Width;
+                int itemHeight = SmallPanel.Height;
+                int startY = 10;
+                int margin = 8;
 
                 foreach (var item in dataList)
                 {
-                    int rowIndex = dataGridView1.Rows.Add(
-                        item.软件名,
-                        item.链接,
-                        item.上传者,
-                        "查看出处",
-                        "下载"
-                    );
-                    dataGridView1.Rows[rowIndex].Tag = item;
+                    AntdUI.Panel itemPanel = new AntdUI.Panel();
+                    itemPanel.Size = new Size(itemWidth, itemHeight);
+                    itemPanel.Location = new Point(6, startY);
+                    itemPanel.BorderWidth = 1;
+                    itemPanel.BackColor = Color.White;
+
+                    AntdUI.Label appname = new AntdUI.Label();
+                    appname.Font = SmallPanel.Controls["appname"].Font;
+                    appname.Location = SmallPanel.Controls["appname"].Location;
+                    appname.Size = SmallPanel.Controls["appname"].Size;
+                    appname.Text = item.软件名;
+                    appname.BackColor = Color.Transparent;
+
+                    AntdUI.Label who = new AntdUI.Label();
+                    who.Font = SmallPanel.Controls["who"].Font;
+                    who.Location = SmallPanel.Controls["who"].Location;
+                    who.Size = SmallPanel.Controls["who"].Size;
+                    who.Text = "上传者: " + item.上传者;
+                    who.BackColor = Color.Transparent;
+
+                    AntdUI.Label form = new AntdUI.Label();
+                    form.Font = SmallPanel.Controls["form"].Font;
+                    form.Location = SmallPanel.Controls["form"].Location;
+                    form.Size = SmallPanel.Controls["form"].Size;
+                    form.Text = "来源: " + item.出处;
+                    form.BackColor = Color.Transparent;
+
+                    AntdUI.Button download = new AntdUI.Button();
+                    download.Location = SmallPanel.Controls["download"].Location;
+                    download.Size = SmallPanel.Controls["download"].Size;
+                    download.Text = "下载软件";
+                    download.Tag = item.链接;
+
+                    if (useThemeColor && themeColor != Color.Empty)
+                    {
+                        ApplyColorToButton(download, themeColor);
+                    }
+                    else
+                    {
+                        download.DefaultBack = Color.AliceBlue;
+                    }
+
+                    download.Click += (s, e) =>
+                    {
+                        try
+                        {
+                            AntdUI.Button btn = (AntdUI.Button)s;
+                            string url = btn.Tag.ToString();
+                            if (!string.IsNullOrWhiteSpace(url))
+                            {
+                                if (!url.StartsWith("http")) url = "http://" + url;
+                                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                            }
+                        }
+                        catch { }
+                    };
+
+                    AntdUI.Button wherebtn = new AntdUI.Button();
+                    wherebtn.Location = SmallPanel.Controls["wherebtn"].Location;
+                    wherebtn.Size = SmallPanel.Controls["wherebtn"].Size;
+                    wherebtn.Text = "查看出处";
+                    wherebtn.Tag = item.出处;
+
+                    if (useThemeColor && themeColor != Color.Empty)
+                    {
+                        ApplyColorToButton(wherebtn, themeColor);
+                    }
+                    else
+                    {
+                        wherebtn.DefaultBack = Color.AliceBlue;
+                    }
+
+                    wherebtn.Click += (s, e) =>
+                    {
+                        try
+                        {
+                            AntdUI.Button btn = (AntdUI.Button)s;
+                            string url = btn.Tag.ToString();
+                            if (!string.IsNullOrWhiteSpace(url))
+                            {
+                                if (!url.StartsWith("http")) url = "http://" + url;
+                                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                            }
+                        }
+                        catch { }
+                    };
+
+                    itemPanel.Controls.Add(appname);
+                    itemPanel.Controls.Add(who);
+                    itemPanel.Controls.Add(form);
+                    itemPanel.Controls.Add(download);
+                    itemPanel.Controls.Add(wherebtn);
+
+                    SuperPanel.Controls.Add(itemPanel);
+                    startY += itemHeight + margin;
                 }
 
-                if (dataGridView1.Rows.Count == 0)
+                if (dataList.Count == 0)
                 {
-                    dataGridView1.Rows.Add("", "", "暂无数据", "", "");
-                    dataGridView1.Rows[0].DefaultCellStyle.ForeColor = Color.Gray;
-                    dataGridView1.Rows[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                    AntdUI.Label tip = new AntdUI.Label();
+                    tip.Text = "暂无数据";
+                    tip.Font = new Font("MiSans Medium", 10F);
+                    tip.ForeColor = Color.Gray;
+                    tip.Location = new Point(SuperPanel.Width / 2 - 50, SuperPanel.Height / 2);
+                    tip.BackColor = Color.Transparent;
+                    SuperPanel.Controls.Add(tip);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"数据显示失败: {ex.Message}", "错误",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("加载失败：" + ex.Message);
             }
         }
 
@@ -622,13 +577,7 @@ namespace SuperShop_Neko
             {
                 control = control.Parent;
             }
-
-            if (control is Form form)
-            {
-                return form;
-            }
-
-            return Form.ActiveForm;
+            return control as Form ?? Form.ActiveForm;
         }
 
         public void RefreshTheme()
@@ -650,5 +599,11 @@ namespace SuperShop_Neko
             public string 出处 { get; set; }
         }
         #endregion
+
+        private void app_Load_1(object sender, EventArgs e)
+        {
+            SmallPanel.Hide();     // 隐藏模板
+            LoadDataWithSpin();    // 加载数据
+        }
     }
 }

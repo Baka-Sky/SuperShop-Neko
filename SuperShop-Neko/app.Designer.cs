@@ -28,21 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panel1 = new AntdUI.Panel();
             reload = new AntdUI.Button();
             delbtn = new AntdUI.Button();
             upbutton = new AntdUI.Button();
             label1 = new AntdUI.Label();
-            dataGridView1 = new DataGridView();
-            软件名 = new DataGridViewTextBoxColumn();
-            链接 = new DataGridViewTextBoxColumn();
-            上传者 = new DataGridViewTextBoxColumn();
-            查看出处 = new DataGridViewButtonColumn();
-            下载 = new DataGridViewButtonColumn();
+            SmallPanel = new AntdUI.Panel();
+            wherebtn = new AntdUI.Button();
+            download = new AntdUI.Button();
+            form = new AntdUI.Label();
+            who = new AntdUI.Label();
+            appname = new AntdUI.Label();
+            SuperPanel = new Panel();
             panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            SmallPanel.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
@@ -100,106 +99,86 @@
             label1.TabIndex = 0;
             label1.Text = "下载工具";
             // 
-            // dataGridView1
+            // SmallPanel
             // 
-            dataGridView1.AllowUserToAddRows = false;
-            dataGridView1.AllowUserToDeleteRows = false;
-            dataGridView1.AllowUserToOrderColumns = true;
-            dataGridView1.AllowUserToResizeColumns = false;
-            dataGridView1.AllowUserToResizeRows = false;
-            dataGridView1.BackgroundColor = Color.AliceBlue;
-            dataGridView1.BorderStyle = BorderStyle.None;
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { 软件名, 链接, 上传者, 查看出处, 下载 });
-            dataGridView1.GridColor = SystemColors.ControlLightLight;
-            dataGridView1.Location = new Point(0, 49);
-            dataGridView1.MultiSelect = false;
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.ReadOnly = true;
-            dataGridView1.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
-            dataGridView1.RowHeadersVisible = false;
-            dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.RowTemplate.Height = 27;
-            dataGridView1.Size = new Size(1103, 398);
-            dataGridView1.TabIndex = 5;
+            SmallPanel.Controls.Add(wherebtn);
+            SmallPanel.Controls.Add(download);
+            SmallPanel.Controls.Add(form);
+            SmallPanel.Controls.Add(who);
+            SmallPanel.Controls.Add(appname);
+            SmallPanel.Location = new Point(6, 52);
+            SmallPanel.Name = "SmallPanel";
+            SmallPanel.Size = new Size(1059, 49);
+            SmallPanel.TabIndex = 5;
+            SmallPanel.Text = "panel2";
             // 
-            // 软件名
+            // wherebtn
             // 
-            软件名.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            软件名.DataPropertyName = "软件名";
-            软件名.HeaderText = "软件名";
-            软件名.MinimumWidth = 6;
-            软件名.Name = "软件名";
-            软件名.ReadOnly = true;
-            软件名.Resizable = DataGridViewTriState.False;
-            软件名.SortMode = DataGridViewColumnSortMode.NotSortable;
-            软件名.Width = 270;
+            wherebtn.DefaultBack = Color.AliceBlue;
+            wherebtn.Icon = Properties.Resources.查看出处;
+            wherebtn.Location = new Point(915, 4);
+            wherebtn.Name = "wherebtn";
+            wherebtn.Size = new Size(139, 40);
+            wherebtn.TabIndex = 5;
+            wherebtn.Text = "查看出处";
             // 
-            // 链接
+            // download
             // 
-            链接.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            链接.DataPropertyName = "链接";
-            链接.HeaderText = "链接";
-            链接.MinimumWidth = 6;
-            链接.Name = "链接";
-            链接.ReadOnly = true;
-            链接.Resizable = DataGridViewTriState.False;
-            链接.Width = 220;
+            download.DefaultBack = Color.AliceBlue;
+            download.Icon = Properties.Resources.下载;
+            download.Location = new Point(760, 4);
+            download.Name = "download";
+            download.Size = new Size(139, 40);
+            download.TabIndex = 4;
+            download.Text = "下载软件";
             // 
-            // 上传者
+            // form
             // 
-            上传者.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            上传者.DataPropertyName = "上传者";
-            上传者.HeaderText = "上传者";
-            上传者.MinimumWidth = 6;
-            上传者.Name = "上传者";
-            上传者.ReadOnly = true;
-            上传者.Resizable = DataGridViewTriState.False;
+            form.Font = new Font("MiSans Medium", 7.799999F);
+            form.Location = new Point(275, 26);
+            form.Name = "form";
+            form.Size = new Size(473, 15);
+            form.TabIndex = 3;
+            form.Text = "软件来源";
             // 
-            // 查看出处
+            // who
             // 
-            查看出处.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.Font = new Font("MiSans Medium", 9F);
-            查看出处.DefaultCellStyle = dataGridViewCellStyle1;
-            查看出处.HeaderText = "查看出处";
-            查看出处.MinimumWidth = 6;
-            查看出处.Name = "查看出处";
-            查看出处.ReadOnly = true;
-            查看出处.Resizable = DataGridViewTriState.False;
-            查看出处.Text = "查看出处";
-            查看出处.ToolTipText = "查看出处";
-            查看出处.UseColumnTextForButtonValue = true;
-            查看出处.Width = 140;
+            who.Font = new Font("MiSans Medium", 7.799999F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            who.Location = new Point(275, 9);
+            who.Name = "who";
+            who.Size = new Size(473, 15);
+            who.TabIndex = 2;
+            who.Text = "上传者:Baka233.top";
             // 
-            // 下载
+            // appname
             // 
-            下载.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle2.Font = new Font("MiSans Medium", 9F);
-            下载.DefaultCellStyle = dataGridViewCellStyle2;
-            下载.HeaderText = "下载";
-            下载.MinimumWidth = 6;
-            下载.Name = "下载";
-            下载.ReadOnly = true;
-            下载.Resizable = DataGridViewTriState.False;
-            下载.Text = "下载";
-            下载.ToolTipText = "下载";
-            下载.UseColumnTextForButtonValue = true;
-            下载.Width = 140;
+            appname.Font = new Font("MiSans Semibold", 7F, FontStyle.Bold);
+            appname.Location = new Point(13, 9);
+            appname.Name = "appname";
+            appname.Size = new Size(256, 32);
+            appname.TabIndex = 1;
+            appname.Text = "实例软件";
+            // 
+            // SuperPanel
+            // 
+            SuperPanel.Location = new Point(3, 49);
+            SuperPanel.Name = "SuperPanel";
+            SuperPanel.Size = new Size(1097, 398);
+            SuperPanel.TabIndex = 6;
             // 
             // app
             // 
             AutoScaleDimensions = new SizeF(120F, 120F);
             AutoScaleMode = AutoScaleMode.Dpi;
-            Controls.Add(dataGridView1);
+            Controls.Add(SmallPanel);
+            Controls.Add(SuperPanel);
             Controls.Add(panel1);
             Font = new Font("MiSans Medium", 9F, FontStyle.Regular, GraphicsUnit.Point, 134);
             Name = "app";
             Size = new Size(1103, 450);
             Load += app_Load_1;
             panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            SmallPanel.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -210,11 +189,12 @@
         private AntdUI.Button upbutton;
         private AntdUI.Button delbtn;
         private AntdUI.Button reload;
-        private DataGridView dataGridView1;
-        private DataGridViewTextBoxColumn 软件名;
-        private DataGridViewTextBoxColumn 链接;
-        private DataGridViewTextBoxColumn 上传者;
-        private DataGridViewButtonColumn 查看出处;
-        private DataGridViewButtonColumn 下载;
+        private AntdUI.Panel SmallPanel;
+        private AntdUI.Button wherebtn;
+        private AntdUI.Button download;
+        private AntdUI.Label form;
+        private AntdUI.Label who;
+        private AntdUI.Label appname;
+        private Panel SuperPanel;
     }
 }
