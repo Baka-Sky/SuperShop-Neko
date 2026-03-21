@@ -11,26 +11,32 @@ using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Windows.UI.Notifications;
+using System.Windows.Forms;
+using System.Text.Json;
 
 namespace SuperShop_Neko
 {
     public class heartengine : IDisposable
     {
         private readonly HttpClient _httpClient;
+        private Form _mainForm;
 
-        public heartengine()
+        public heartengine(Form mainForm = null)
         {
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromSeconds(30);
             _httpClient.DefaultRequestHeaders.Add("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+
+            _mainForm = mainForm;
+        }
+
+        public void SetMainForm(Form mainForm)
+        {
+            _mainForm = mainForm;
         }
 
         #region 版本信息功能
-
-        /// <summary>
-        /// 获取完整的版本信息
-        /// </summary>
         public string GetVersionInfo()
         {
             try
@@ -40,48 +46,22 @@ namespace SuperShop_Neko
                 sb.AppendLine("          超级小铺 Neko - 版本信息");
                 sb.AppendLine("═══════════════════════════════════════════");
                 sb.AppendLine();
-
-                // 1. 软件版本号
                 sb.AppendLine($"📦 软件版本号: {GetSoftwareVersion()}");
-
-                // 2. 内核版本号
                 sb.AppendLine($"⚙️  内核版本号: {GetCoreVersion()}");
-
-                // 3. 软件构建时间戳
                 sb.AppendLine($"🕐 软件构建时间: {GetBuildTimestamp()}");
-
-                // 4. .NET版本号
                 sb.AppendLine($"🔧 .NET 运行时: {GetDotNetVersion()}");
-
-                // 5. WebView2版本号
                 sb.AppendLine($"🌐 WebView2版本: {GetWebView2Version()}");
-
-                // 6. C#语言版本
                 sb.AppendLine($"💻 C# 语言版本: {GetCSharpVersion()}");
-
-                // 7. 系统内核版本
                 sb.AppendLine($"🖥️  系统内核版本: {GetWindowsKernelVersion()}");
-
-                // 8. 软件运行目录
                 sb.AppendLine($"📁 软件运行目录: {GetApplicationDirectory()}");
-
-                // 9. 操作系统信息
                 sb.AppendLine($"💿 操作系统: {GetOSInfo()}");
-
-                // 10. 系统架构
                 sb.AppendLine($"🏗️  系统架构: {GetSystemArchitecture()}");
-
-                // 11. 内存信息
                 sb.AppendLine($"💾 内存使用: {GetMemoryInfo()}");
-
-                // 12. 处理器信息
                 sb.AppendLine($"🚀 处理器: {GetProcessorInfo()}");
-
                 sb.AppendLine();
                 sb.AppendLine("═══════════════════════════════════════════");
                 sb.AppendLine("                          HeartEngine4 & HeartCore1");
                 sb.AppendLine("═══════════════════════════════════════════");
-
                 return sb.ToString();
             }
             catch (Exception ex)
@@ -90,31 +70,21 @@ namespace SuperShop_Neko
             }
         }
 
-        /// <summary>
-        /// 获取软件版本号
-        /// </summary>
         private string GetSoftwareVersion()
         {
             try
             {
                 var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
-
-                // 1. 优先获取文件版本（AssemblyFileVersion）
                 var fileVersionAttr = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
                 if (fileVersionAttr != null && !string.IsNullOrEmpty(fileVersionAttr.Version))
                 {
                     return fileVersionAttr.Version;
                 }
-
-                // 2. 获取程序集版本（AssemblyVersion）
                 var version = assembly.GetName().Version;
                 if (version != null)
                 {
-                    // 格式化版本号（如 1.2.3.4）
                     return $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
                 }
-
-                // 3. 默认版本
                 return "1.0.0.0";
             }
             catch
@@ -123,25 +93,11 @@ namespace SuperShop_Neko
             }
         }
 
-        /// <summary>
-        /// 获取内核版本号
-        /// </summary>
         private string GetCoreVersion()
         {
-            try
-            {
-                // 返回你的引擎版本
-                return "HeartEngine4 & HeartCore1";
-            }
-            catch
-            {
-                return "HeartEngine4 & HeartCore1";
-            }
+            return "HeartEngine4 & HeartCore1";
         }
 
-        /// <summary>
-        /// 获取构建时间戳
-        /// </summary>
         private string GetBuildTimestamp()
         {
             try
@@ -156,14 +112,10 @@ namespace SuperShop_Neko
             }
         }
 
-        /// <summary>
-        /// 获取.NET版本
-        /// </summary>
         private string GetDotNetVersion()
         {
             try
             {
-                // 获取详细的.NET版本信息
                 var version = Environment.Version;
                 var description = RuntimeInformation.FrameworkDescription;
                 return $"{description} (v{version})";
@@ -174,225 +126,165 @@ namespace SuperShop_Neko
             }
         }
 
-        /// <summary>
-        /// 获取WebView2版本
-        /// </summary>
         private string GetWebView2Version()
         {
             try
             {
-                // 方法1: 通过注册表获取
-                string[] registryPaths = new string[]
+                string[] registryPaths = new[]
                 {
                     @"SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}",
                     @"SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
                 };
-
                 foreach (var path in registryPaths)
                 {
-                    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(path))
+                    using (var key = Registry.LocalMachine.OpenSubKey(path))
                     {
                         if (key != null)
                         {
-                            var version = key.GetValue("pv")?.ToString();
-                            if (!string.IsNullOrEmpty(version))
-                                return version;
+                            var v = key.GetValue("pv")?.ToString();
+                            if (!string.IsNullOrEmpty(v)) return v;
                         }
                     }
                 }
 
-                // 方法2: 通过安装路径检查
-                string[] possiblePaths = new string[]
+                string[] paths =
                 {
                     Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Microsoft", "EdgeWebView", "Application"),
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Microsoft", "EdgeWebView", "Application"),
-                    @"C:\Program Files (x86)\Microsoft\EdgeWebView\Application",
-                    @"C:\Program Files\Microsoft\EdgeWebView\Application"
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Microsoft", "EdgeWebView", "Application")
                 };
-
-                foreach (var path in possiblePaths)
+                foreach (var p in paths)
                 {
-                    if (Directory.Exists(path))
+                    if (Directory.Exists(p))
                     {
-                        var dirs = Directory.GetDirectories(path);
-                        foreach (var dir in dirs)
+                        foreach (var d in Directory.GetDirectories(p))
                         {
-                            var dirName = Path.GetFileName(dir);
-                            if (System.Version.TryParse(dirName, out _))
-                            {
-                                return dirName;
-                            }
+                            var name = Path.GetFileName(d);
+                            if (Version.TryParse(name, out _))
+                                return name;
                         }
                     }
                 }
-
-                return "未检测到WebView2";
+                return "未安装";
             }
             catch
             {
-                return "检测失败";
+                return "获取失败";
             }
         }
 
-        /// <summary>
-        /// 获取C#版本
-        /// </summary>
         private string GetCSharpVersion()
         {
             try
             {
-                // 根据.NET版本返回对应的C#版本
-                var version = Environment.Version;
-
-                if (version.Major >= 8) return "C# 12.0 (或更高)";
-                if (version.Major >= 7) return "C# 11.0";
-                if (version.Major >= 6) return "C# 10.0";
-                if (version.Major >= 5) return "C# 9.0";
-                if (version.Major == 4 && version.Minor >= 8) return "C# 7.3";
-                if (version.Major == 4 && version.Minor >= 7) return "C# 7.2";
-                if (version.Major == 4 && version.Minor >= 6) return "C# 7.0";
-
-                return "C# (早期版本)";
+                var v = Environment.Version;
+                if (v.Major >= 8) return "C# 12+";
+                if (v.Major >= 7) return "C# 11";
+                if (v.Major >= 6) return "C# 10";
+                if (v.Major >= 5) return "C# 9";
+                return "C# 7+";
             }
             catch
             {
-                return "C# 版本未知";
+                return "未知";
             }
         }
 
-        /// <summary>
-        /// 获取Windows内核版本
-        /// </summary>
         private string GetWindowsKernelVersion()
         {
             try
             {
-                var osVersion = Environment.OSVersion;
-                return $"Windows NT {osVersion.Version.Major}.{osVersion.Version.Minor} (Build {osVersion.Version.Build}.{osVersion.Version.Revision})";
+                var v = Environment.OSVersion.Version;
+                return $"NT {v.Major}.{v.Minor} Build {v.Build}";
             }
             catch
             {
-                return "Windows NT 未知版本";
+                return "未知";
             }
         }
 
-        /// <summary>
-        /// 获取应用程序运行目录
-        /// </summary>
         private string GetApplicationDirectory()
         {
             try
             {
-                var directory = AppDomain.CurrentDomain.BaseDirectory;
-                // 如果路径太长，可以截断显示
-                if (directory.Length > 60)
-                {
-                    return "..." + directory.Substring(directory.Length - 50);
-                }
-                return directory;
+                var d = AppDomain.CurrentDomain.BaseDirectory;
+                return d.Length > 60 ? "…" + d.Substring(d.Length - 50) : d;
             }
             catch
             {
-                return "未知目录";
+                return "未知";
             }
         }
 
-        /// <summary>
-        /// 获取操作系统信息
-        /// </summary>
         private string GetOSInfo()
         {
             try
             {
-                string osName = "Windows";
+                var v = Environment.OSVersion.Version;
+                string name = "Windows";
 
-                // 尝试获取更详细的Windows版本
-                if (Environment.OSVersion.Version.Major == 10)
+                if (v.Major == 10)
+                    name = v.Build >= 2200 ? "Windows 11" : "Windows 10";
+                else if (v.Major == 6)
                 {
-                    if (Environment.OSVersion.Version.Build >= 22000) osName = "Windows 11";
-                    else osName = "Windows 10";
+                    if (v.Minor == 3) name = "Windows 8.1";
+                    else if (v.Minor == 2) name = "Windows 8";
+                    else if (v.Minor == 1) name = "Windows 7";
+                    else name = "Windows Vista";
                 }
-                else if (Environment.OSVersion.Version.Major == 6)
-                {
-                    if (Environment.OSVersion.Version.Minor == 3) osName = "Windows 8.1";
-                    else if (Environment.OSVersion.Version.Minor == 2) osName = "Windows 8";
-                    else if (Environment.OSVersion.Version.Minor == 1) osName = "Windows 7";
-                    else if (Environment.OSVersion.Version.Minor == 0) osName = "Windows Vista";
-                }
-
-                return $"{osName} {Environment.OSVersion.Version} {(Environment.Is64BitOperatingSystem ? "64位" : "32位")}";
+                return $"{name} {(Environment.Is64BitOperatingSystem ? "64位" : "32位")}";
             }
             catch
             {
-                return "未知操作系统";
+                return "Windows";
             }
         }
 
-        /// <summary>
-        /// 获取系统架构
-        /// </summary>
         private string GetSystemArchitecture()
         {
             try
             {
-                return $"{RuntimeInformation.OSArchitecture} 架构";
+                return RuntimeInformation.OSArchitecture.ToString();
             }
             catch
             {
-                return Environment.Is64BitOperatingSystem ? "x64" : "x86";
+                return Environment.Is64BitOperatingSystem ? "64位" : "32位";
             }
         }
 
-        /// <summary>
-        /// 获取内存信息
-        /// </summary>
         private string GetMemoryInfo()
         {
             try
             {
-                var process = Process.GetCurrentProcess();
-                var usedMemoryMB = process.WorkingSet64 / (1024 * 1024);
-                var privateMemoryMB = process.PrivateMemorySize64 / (1024 * 1024);
-
-                return $"工作集: {usedMemoryMB} MB | 私有内存: {privateMemoryMB} MB";
+                var p = Process.GetCurrentProcess();
+                return $"{p.WorkingSet64 / 1048576} MB";
             }
             catch
             {
-                return "内存信息不可用";
+                return "未知";
             }
         }
 
-        /// <summary>
-        /// 获取处理器信息
-        /// </summary>
         private string GetProcessorInfo()
         {
             try
             {
-                return $"{Environment.ProcessorCount} 个逻辑处理器 | {(Environment.Is64BitProcess ? "64位" : "32位")} 进程";
+                return $"{Environment.ProcessorCount} 核";
             }
             catch
             {
-                return $"{Environment.ProcessorCount} 核心";
+                return "未知";
             }
         }
-
         #endregion
 
-        #region 天气服务功能
-
-        /// <summary>
-        /// 根据城市名称获取天气信息
-        /// </summary>
+        #region 天气功能
         public async Task<string[]> GetWeatherByCityName(string cityName)
         {
             try
             {
-                string soapRequest = $"""
+                string soap = $"""
                     <?xml version="1.0" encoding="utf-8"?>
-                    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                                   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-                                   xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+                    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
                       <soap:Body>
                         <getWeatherbyCityName xmlns="http://WebXml.com.cn/">
                           <theCityName>{EscapeXml(cityName)}</theCityName>
@@ -401,24 +293,16 @@ namespace SuperShop_Neko
                     </soap:Envelope>
                     """;
 
-                var content = new StringContent(soapRequest, Encoding.UTF8, "text/xml");
-                content.Headers.Add("SOAPAction", "http://WebXml.com.cn/getWeatherbyCityName");
+                var c = new StringContent(soap, Encoding.UTF8, "text/xml");
+                c.Headers.Add("SOAPAction", "http://WebXml.com.cn/getWeatherbyCityName");
 
-                var response = await _httpClient.PostAsync(
-                    "http://www.webxml.com.cn/WebServices/WeatherWebService.asmx",
-                    content);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"HTTP错误: {response.StatusCode}");
-                }
-
-                string responseXml = await response.Content.ReadAsStringAsync();
-                return ParseWeatherResponse(responseXml);
+                var r = await _httpClient.PostAsync("http://www.webxml.com.cn/WebServices/WeatherWebService.asmx", c);
+                r.EnsureSuccessStatusCode();
+                return ParseWeatherResponse(await r.Content.ReadAsStringAsync());
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception($"获取天气失败: {ex.Message}", ex);
+                return new[] { "获取天气失败" };
             }
         }
 
@@ -426,206 +310,187 @@ namespace SuperShop_Neko
         {
             try
             {
-                var doc = new XmlDocument();
-                doc.LoadXml(xml);
+                var d = new XmlDocument();
+                d.LoadXml(xml);
+                var m = new XmlNamespaceManager(d.NameTable);
+                m.AddNamespace("soap", "http://schemas.xmlsoap.org/soap/envelope/");
+                m.AddNamespace("ns", "http://WebXml.com.cn/");
 
-                var nsManager = new XmlNamespaceManager(doc.NameTable);
-                nsManager.AddNamespace("soap", "http://schemas.xmlsoap.org/soap/envelope/");
-                nsManager.AddNamespace("ns", "http://WebXml.com.cn/");
+                var ns = d.SelectNodes("//ns:string", m);
+                var res = new string[ns.Count];
+                for (int i = 0; i < ns.Count; i++)
+                    res[i] = ns[i].InnerText;
 
-                var stringNodes = doc.SelectNodes(
-                    "/soap:Envelope/soap:Body/ns:getWeatherbyCityNameResponse/ns:getWeatherbyCityNameResult/ns:string",
-                    nsManager);
-
-                if (stringNodes == null || stringNodes.Count == 0)
-                {
-                    return new string[] { "未找到天气信息" };
-                }
-
-                var result = new string[stringNodes.Count];
-                for (int i = 0; i < stringNodes.Count; i++)
-                {
-                    result[i] = stringNodes[i]?.InnerText ?? "";
-                }
-
-                return result;
+                return res;
             }
-            catch (Exception ex)
+            catch
             {
-                return new string[] { $"解析错误: {ex.Message}" };
+                return new[] { "解析失败" };
             }
         }
 
-        /// <summary>
-        /// 获取格式化的天气信息
-        /// </summary>
-        public async Task<string> GetFormattedWeather(string cityName)
+        public async Task<string> GetFormattedWeather(string city)
+        {
+            var data = await GetWeatherByCityName(city);
+            if (data.Length >= 10)
+                return $"{data[1]} {data[6]} {data[5]}";
+            return "无法获取天气";
+        }
+
+        private string EscapeXml(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return s;
+            return s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
+        }
+        #endregion
+
+        #region 更新与Toast
+        public async Task CheckForUpdateAsync()
         {
             try
             {
-                var weatherData = await GetWeatherByCityName(cityName);
+                string sv = await GetServerVersionAsync();
+                if (string.IsNullOrWhiteSpace(sv)) return;
 
-                if (weatherData.Length > 8 && string.IsNullOrEmpty(weatherData[8]))
+                string lv = ReadLocalVersionFromConfig();
+                if (string.IsNullOrWhiteSpace(lv)) return;
+
+                if (IsNewerVersionAvailable(lv, sv))
                 {
-                    return "暂时不支持您查询的城市";
+                    ShowUpdateToast(sv);
                 }
+            }
+            catch { }
+        }
 
-                if (weatherData.Length >= 23)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendLine($"城市：{weatherData[1]} ({weatherData[0]})");
-                    sb.AppendLine($"更新时间：{weatherData[4]} {weatherData[5]}");
-                    sb.AppendLine($"天气：{weatherData[6]}");
-                    sb.AppendLine($"气温：{weatherData[5]}");
-                    sb.AppendLine($"风力：{weatherData[7]}");
+        private async Task<string> GetServerVersionAsync()
+        {
+            try
+            {
+                return (await _httpClient.GetStringAsync("https://shop.baka233.top/update/version.txt")).Trim();
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
-                    if (weatherData.Length > 10)
+        public string ReadLocalVersionFromConfig()
+        {
+            try
+            {
+                string f = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+                if (!File.Exists(f)) return null;
+                using var doc = JsonDocument.Parse(File.ReadAllText(f));
+                if (doc.RootElement.TryGetProperty("Version", out var v))
+                    return v.GetString()?.Trim();
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private bool IsNewerVersionAvailable(string local, string server)
+        {
+            try
+            {
+                Version v1 = new Version(local.Trim());
+                Version v2 = new Version(server.Trim());
+                return v2 > v1;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public void ShowUpdateToast(string targetVersion)
+        {
+            try
+            {
+                string lv = ReadLocalVersionFromConfig() ?? "未知";
+                new ToastContentBuilder()
+                    .AddArgument("action", "update_notification")
+                    .AddArgument("target_version", targetVersion)
+                    .AddText("超级小铺有新版本可用！")
+                    .AddText($"当前版本: {lv}")
+                    .AddText($"最新版本: {targetVersion}")
+                    .AddButton(new ToastButton().SetContent("立即更新").AddArgument("choice", "update_now"))
+                    .AddButton(new ToastButton().SetContent("稍后提醒").AddArgument("choice", "update_later"))
+                    .SetToastDuration(ToastDuration.Long)
+                    .Show(toast =>
                     {
-                        sb.AppendLine("\n详细信息：");
-                        for (int i = 10; i < Math.Min(weatherData.Length, 15); i++)
-                        {
-                            if (!string.IsNullOrEmpty(weatherData[i]))
-                            {
-                                sb.AppendLine($"  {weatherData[i]}");
-                            }
-                        }
-                    }
+                        toast.Activated += (s, e) => Toast_Activated(s, e, targetVersion);
+                    });
+            }
+            catch
+            {
+                ShowUpdateMessageBox(targetVersion);
+            }
+        }
 
-                    return sb.ToString();
-                }
-                else if (weatherData.Length > 0)
+        private async void Toast_Activated(ToastNotification sender, object args, string tv)
+        {
+            await Task.Delay(100);
+            if (_mainForm == null || _mainForm.IsDisposed) return;
+
+            _mainForm.Invoke(() =>
+            {
+                if (args is ToastActivatedEventArgs e)
                 {
-                    return string.Join("\n", weatherData);
+                    if (e.Arguments.Contains("update_now"))
+                        HandleUpdateNow(tv);
                 }
                 else
                 {
-                    return "未获取到天气数据";
+                    ShowUpdateMessageBox(tv);
                 }
-            }
-            catch (Exception ex)
-            {
-                return $"查询失败: {ex.Message}";
-            }
+            });
         }
 
-        private string EscapeXml(string input)
+        public void ShowUpdateMessageBox(string targetVersion)
         {
-            if (string.IsNullOrEmpty(input)) return input;
+            string lv = ReadLocalVersionFromConfig() ?? "未知";
+            var res = MessageBox.Show(
+                $"有新版本！\n当前：{lv}\n最新：{targetVersion}\n是否立即更新？",
+                "更新", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-            return input
-                .Replace("&", "&amp;")
-                .Replace("<", "&lt;")
-                .Replace(">", "&gt;")
-                .Replace("\"", "&quot;")
-                .Replace("'", "&apos;");
+            if (res == DialogResult.Yes)
+                HandleUpdateNow(targetVersion);
         }
 
+        public async void HandleUpdateNow(string targetVersion)
+        {
+            try
+            {
+                await Task.Run(() =>
+                {
+                    Process.Start(new ProcessStartInfo("https://shop.baka233.top/shop.exe")
+                    { UseShellExecute = true });
+                });
+                MessageBox.Show("已打开下载页面！", "更新");
+            }
+            catch
+            {
+                MessageBox.Show("更新失败，请手动前往官网下载", "错误");
+            }
+        }
+
+        // 支持传入 URL，给 welcome 页面用
+        public async Task<string> GetUpdateTextAsync(string url)
+        {
+            try
+            {
+                return await _httpClient.GetStringAsync(url);
+            }
+            catch
+            {
+                return null;
+            }
+        }
         #endregion
-
-        #region 更新服务功能
-
-        /// <summary>
-        /// 获取更新文字（针对welcome.cs使用）
-        /// </summary>
-        public async Task<string> GetUpdateTextAsync(string updateUrl = null)
-        {
-            try
-            {
-                // 如果提供了URL，直接使用
-                if (!string.IsNullOrEmpty(updateUrl))
-                {
-                    return await GetUrlContentAsync(updateUrl);
-                }
-
-                // 否则尝试多个可能的URL
-                string[] possibleUrls = new string[]
-                {
-                    "https://shop.baka233.top/update/uptext.txt",
-                    "http://shop.baka233.top/update/uptext.txt",
-                };
-
-                foreach (var url in possibleUrls)
-                {
-                    try
-                    {
-                        var content = await GetUrlContentAsync(url);
-                        if (!string.IsNullOrEmpty(content))
-                        {
-                            return content;
-                        }
-                    }
-                    catch
-                    {
-                        // 继续尝试下一个URL
-                        continue;
-                    }
-                }
-
-                throw new Exception("所有更新服务器都不可用");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"获取更新失败: {ex.Message}", ex);
-            }
-        }
-
-        /// <summary>
-        /// 获取URL内容
-        /// </summary>
-        private async Task<string> GetUrlContentAsync(string url)
-        {
-            try
-            {
-                var response = await _httpClient.GetAsync(url);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string content = await response.Content.ReadAsStringAsync();
-                    return content.Trim();
-                }
-                else
-                {
-                    throw new Exception($"HTTP错误: {response.StatusCode}");
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"URL {url} 失败: {ex.Message}", ex);
-            }
-        }
-
-        /// <summary>
-        /// 检查更新状态
-        /// </summary>
-        public async Task<UpdateCheckResult> CheckUpdateAsync(string currentVersion = null)
-        {
-            try
-            {
-                string updateText = await GetUpdateTextAsync();
-
-                return new UpdateCheckResult
-                {
-                    Success = true,
-                    UpdateText = updateText,
-                    HasUpdate = string.IsNullOrEmpty(currentVersion) ||
-                                !updateText.Contains(currentVersion),
-                    CheckTime = DateTime.Now
-                };
-            }
-            catch (Exception ex)
-            {
-                return new UpdateCheckResult
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message,
-                    HasUpdate = false,
-                    CheckTime = DateTime.Now
-                };
-            }
-        }
-
-        #endregion
-
 
         public void Dispose()
         {
@@ -633,9 +498,6 @@ namespace SuperShop_Neko
         }
     }
 
-    /// <summary>
-    /// 更新检查结果
-    /// </summary>
     public class UpdateCheckResult
     {
         public bool Success { get; set; }

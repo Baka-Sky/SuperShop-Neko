@@ -496,14 +496,11 @@ namespace SuperShop_Neko
                 if (versiontext == null || this.IsDisposed)
                     return;
 
-                // 设置加载状态
                 SetVersionTextSafe("正在获取更新信息...", Color.Gray);
 
-                // 使用heartengine获取更新信息
                 string updateText = null;
                 Exception lastError = null;
 
-                // 尝试所有URL
                 for (int i = 0; i < _updateUrls.Count; i++)
                 {
                     try
@@ -525,19 +522,16 @@ namespace SuperShop_Neko
                     catch (Exception ex)
                     {
                         lastError = ex;
-                        Console.WriteLine($"URL {_updateUrls[i]} 失败: {ex.Message}");
                         updateText = null;
                     }
                 }
 
-                // 检查结果
                 if (string.IsNullOrEmpty(updateText))
                 {
                     string errorMsg = lastError != null ? lastError.Message : "未知错误";
                     throw new Exception($"所有更新服务器都不可用\n最后错误: {errorMsg}");
                 }
 
-                // 缓存结果
                 _globalUpdateText = updateText;
                 _globalUpdateColor = Color.Black;
                 _globalUpdateLoaded = true;
@@ -557,6 +551,7 @@ namespace SuperShop_Neko
                 _isUpdating = false;
             }
         }
+
 
         /// <summary>
         /// 安全地设置版本文本

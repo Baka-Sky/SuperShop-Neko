@@ -115,7 +115,7 @@
             // wherebtn
             // 
             wherebtn.DefaultBack = Color.AliceBlue;
-            wherebtn.Icon = Properties.Resources.查看出处;
+            //wherebtn.Icon = Properties.Resources.查看出处;
             wherebtn.Location = new Point(915, 4);
             wherebtn.Name = "wherebtn";
             wherebtn.Size = new Size(139, 40);
