@@ -33,6 +33,7 @@
             user = new PictureBox();
             labelTime1 = new AntdUI.LabelTime();
             panel1 = new AntdUI.Panel();
+            Info = new AntdUI.Button();
             more = new AntdUI.Button();
             tools = new AntdUI.Button();
             dwn = new AntdUI.Button();
@@ -78,6 +79,9 @@
             // 
             // panel1
             // 
+            panel1.Back = SystemColors.Control;
+            panel1.BackColor = SystemColors.Control;
+            panel1.Controls.Add(Info);
             panel1.Controls.Add(more);
             panel1.Controls.Add(tools);
             panel1.Controls.Add(dwn);
@@ -88,10 +92,20 @@
             panel1.TabIndex = 1;
             panel1.Text = "panel1";
             // 
+            // Info
+            // 
+            Info.Icon = (Image)resources.GetObject("Info.Icon");
+            Info.Location = new Point(666, 1);
+            Info.Name = "Info";
+            Info.Size = new Size(159, 43);
+            Info.TabIndex = 4;
+            Info.Text = "信息";
+            Info.Click += Info_Click;
+            // 
             // more
             // 
             more.Icon = Properties.Resources.更多;
-            more.Location = new Point(666, 1);
+            more.Location = new Point(446, 1);
             more.Name = "more";
             more.Size = new Size(214, 43);
             more.TabIndex = 3;
@@ -101,7 +115,7 @@
             // tools
             // 
             tools.Icon = Properties.Resources.工具;
-            tools.Location = new Point(446, 1);
+            tools.Location = new Point(226, 1);
             tools.Name = "tools";
             tools.Size = new Size(214, 43);
             tools.TabIndex = 2;
@@ -111,9 +125,9 @@
             // dwn
             // 
             dwn.Icon = Properties.Resources.下载;
-            dwn.Location = new Point(226, 1);
+            dwn.Location = new Point(831, 0);
             dwn.Name = "dwn";
-            dwn.Size = new Size(214, 43);
+            dwn.Size = new Size(44, 43);
             dwn.TabIndex = 1;
             dwn.Text = "下载";
             dwn.Click += dwn_Click;
@@ -167,5 +181,6 @@
         public AntdUI.Panel shop;
         private AntdUI.LabelTime labelTime1;
         private PictureBox user;
+        private AntdUI.Button Info;
     }
 }

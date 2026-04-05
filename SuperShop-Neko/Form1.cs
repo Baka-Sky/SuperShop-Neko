@@ -60,6 +60,35 @@ namespace SuperShop_Neko
             {
                 LoadWelcomePage(true);
                 _isInitialLoad = false;
+
+                // 用反射获取私有字段或方法
+                try
+                {
+                    var method = typeof(heartengine).GetMethod("GetServerVersionAsync",
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (method != null)
+                    {
+                        var task = method.Invoke(HeartEngine, null) as Task<string>;
+                        task?.ContinueWith(t =>
+                        {
+                            if (t.IsCompletedSuccessfully && !string.IsNullOrEmpty(t.Result))
+                            {
+                                string lv = HeartEngine.ReadLocalVersionFromConfig();
+                                if (Version.TryParse(lv, out Version local) &&
+                                    Version.TryParse(t.Result.Trim(), out Version server) &&
+                                    server > local)
+                                {
+                                    this.BeginInvoke(new Action(() =>
+                                    {
+                                        page.SubText = $"新更新! 目标版本:{t.Result.Trim()}";
+                                    }));
+                                }
+                            }
+                        });
+                    }
+                }
+                catch { }
+
                 _ = HeartEngine.CheckForUpdateAsync();
             }));
         }
@@ -70,6 +99,7 @@ namespace SuperShop_Neko
             if (dwn is AntdUI.Button) allAntdButtons.Add(dwn as AntdUI.Button);
             if (tools is AntdUI.Button) allAntdButtons.Add(tools as AntdUI.Button);
             if (more is AntdUI.Button) allAntdButtons.Add(more as AntdUI.Button);
+            if (Info is AntdUI.Button) allAntdButtons.Add(Info as AntdUI.Button);
         }
 
         private void LoadThemeColorConfig()
@@ -322,6 +352,28 @@ namespace SuperShop_Neko
             finally { shop.ResumeLayout(true); }
         }
 
+        // ====================== 你要的 Info 按钮页面（完全照搬你的逻辑）======================
+        private void LoadSystemInfoPage()
+        {
+            if (shop == null) return;
+            shop.SuspendLayout();
+            try
+            {
+                shop.Controls.Clear();
+                systeminfo sysPage = new systeminfo();
+                sysPage.Dock = DockStyle.Fill;
+                shop.Controls.Add(sysPage);
+
+                UpdateButtonColors(Info as AntdUI.Button);
+                currentPage = PageType.App;
+            }
+            finally
+            {
+                shop.ResumeLayout(true);
+            }
+        }
+        // ====================================================================================
+
         private void SetAllButtonsToInactive()
         {
             currentActiveButton = null;
@@ -407,10 +459,23 @@ namespace SuperShop_Neko
         private void F4_OnSwitchToAI(object sender, EventArgs e) => SwitchToAIPage();
 
         private void homebtn_Click(object sender, EventArgs e) => LoadWelcomePage();
-        private void dwn_Click(object sender, EventArgs e) => LoadAppPage();
+        private void dwn_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("SuperShop下载区域将于近期版本弃用\n这意味着您在上传的软件会在近期删除存储软件的数据\n您确定继续使用下载区域吗？", "提示", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (result != DialogResult.OK) return;
+
+            LoadAppPage();
+        }
         private void tools_Click(object sender, EventArgs e) => LoadToolsPage();
         private void more_Click(object sender, EventArgs e) => LoadMorePage();
         private void user_Click(object sender, EventArgs e) => LoadUserPage();
+
+        // ====================== Info 点击事件（和你所有按钮格式一样）======================
+        private void Info_Click(object sender, EventArgs e)
+        {
+            LoadSystemInfoPage();
+        }
+        // ==================================================================================
 
         private void UpdateButtonColors(AntdUI.Button activeButton)
         {

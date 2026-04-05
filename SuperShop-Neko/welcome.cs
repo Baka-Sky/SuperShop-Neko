@@ -715,7 +715,6 @@ namespace SuperShop_Neko
                     string weatherInfo = await weatherService.GetFormattedWeather(city);
                     weatheroutput.Text = weatherInfo;
                     weatheroutput.SelectionStart = 0;
-                    weatheroutput.ScrollToCaret();
                 }
             }
             catch (Exception ex)

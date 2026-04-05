@@ -118,65 +118,23 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Logo画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Logo画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="下载" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\下载.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="未标题-11" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\未标题-12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="关于 (2)" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\关于 (2).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="cloud画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cloud画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="imageres 085" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\imageres 085.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="更多" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\更多.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="disk画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\disk画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="engine画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\engine画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="cb78ae4e11e3cf263380cfafe3540b4" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cb78ae4e11e3cf263380cfafe3540b4.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="SkyChat Black画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SkyChat Black画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="工具" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\工具.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="7i画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\7i画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="用户 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\用户 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="disk10画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\disk10画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="主页" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\主页.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="disk画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\disk画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="disk10画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\disk10画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="shell32 239" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\shell32 239.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="cloud画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cloud画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="imageres 094" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\imageres 094.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="imageres 014" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\imageres 014.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="SkyChat Black画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SkyChat Black画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Lo3go画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Lo3go画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -184,19 +142,67 @@
   <data name="disk6画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\disk6画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="开发者选项" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\开发者选项.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Logo画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Logo画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="imageres 0851" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\imageres 0851.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="未标题-1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\未标题-11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="imageres 0941" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\imageres 0941.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="imageres 0851" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\imageres 0851.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="下载" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\下载.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="engine画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\engine画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="imageres 014" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\imageres 014.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="查看出处" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\查看出处.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="开发者选项" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\开发者选项.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="imageres 094" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\imageres 094.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="关于 (2)" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\关于 (2).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="imageres 0941" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\imageres 0941.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="7i画板 1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\7i画板 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="shell32 239" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\shell32 239.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="cb78ae4e11e3cf263380cfafe3540b4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cb78ae4e11e3cf263380cfafe3540b4.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="更多" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\更多.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="工具" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\工具.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="用户 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\用户 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="信息" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\信息.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="未标题-11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\未标题-12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="信息 (1)" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\信息 (1).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
