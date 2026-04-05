@@ -79,8 +79,7 @@
             // 
             // panel1
             // 
-            panel1.Back = SystemColors.Control;
-            panel1.BackColor = SystemColors.Control;
+            panel1.BackColor = Color.White;
             panel1.Controls.Add(Info);
             panel1.Controls.Add(more);
             panel1.Controls.Add(tools);
