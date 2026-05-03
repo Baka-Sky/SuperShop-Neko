@@ -17,6 +17,11 @@ namespace SuperShop_Neko
 
         private void about_Load(object sender, EventArgs e)
         {
+            input1.SelectionStart = 0;
+        }
+
+        private void label10_Click(object sender, EventArgs e)
+        {
 
         }
     }

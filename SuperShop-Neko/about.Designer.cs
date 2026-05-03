@@ -41,6 +41,7 @@
             pictureBox2 = new PictureBox();
             label9 = new Label();
             input1 = new AntdUI.Input();
+            label10 = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             SuspendLayout();
@@ -48,7 +49,7 @@
             // pictureBox1
             // 
             pictureBox1.Image = Properties.Resources.未标题_1;
-            pictureBox1.Location = new Point(12, 14);
+            pictureBox1.Location = new Point(12, 15);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(191, 98);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
@@ -121,7 +122,7 @@
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new Point(209, 32);
+            label8.Location = new Point(215, 36);
             label8.Name = "label8";
             label8.Size = new Size(234, 58);
             label8.TabIndex = 8;
@@ -159,10 +160,22 @@
             input1.TabIndex = 11;
             input1.Text = resources.GetString("input1.Text");
             // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Font = new Font("MiSans Medium", 11F);
+            label10.Location = new Point(819, 41);
+            label10.Name = "label10";
+            label10.Size = new Size(253, 50);
+            label10.TabIndex = 12;
+            label10.Text = "Github\r\nBaka-Sky/SuperShop-Neko";
+            label10.Click += label10_Click;
+            // 
             // about
             // 
             AutoScaleDimensions = new SizeF(120F, 120F);
             AutoScaleMode = AutoScaleMode.Dpi;
+            Controls.Add(label10);
             Controls.Add(input1);
             Controls.Add(label9);
             Controls.Add(pictureBox2);
@@ -199,5 +212,6 @@
         private PictureBox pictureBox2;
         private Label label9;
         private AntdUI.Input input1;
+        private Label label10;
     }
 }

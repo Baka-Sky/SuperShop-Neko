@@ -3,11 +3,63 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Management;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SuperShop_Neko
 {
     public partial class systeminfo : UserControl
     {
+        // 显示器相关 API 声明
+        [DllImport("user32.dll", CharSet = CharSet.Ansi)]
+        private static extern bool EnumDisplayDevices(string lpDevice, uint iDevNum, ref DISPLAY_DEVICE lpDisplayDevice, uint dwFlags);
+
+        [DllImport("setupapi.dll", SetLastError = true)]
+        private static extern IntPtr SetupDiGetClassDevs(ref Guid ClassGuid, IntPtr Enumerator, IntPtr hwndParent, uint Flags);
+
+        [DllImport("setupapi.dll", SetLastError = true)]
+        private static extern bool SetupDiEnumDeviceInfo(IntPtr DeviceInfoSet, uint MemberIndex, ref SP_DEVINFO_DATA DeviceInfoData);
+
+        [DllImport("setupapi.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool SetupDiGetDeviceRegistryProperty(IntPtr DeviceInfoSet, ref SP_DEVINFO_DATA DeviceInfoData, uint Property, ref uint PropertyRegDataType, IntPtr PropertyBuffer, uint PropertyBufferSize, ref uint RequiredSize);
+
+        [DllImport("setupapi.dll", SetLastError = true)]
+        private static extern bool SetupDiDestroyDeviceInfoList(IntPtr DeviceInfoSet);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct DISPLAY_DEVICE
+        {
+            public uint cb;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string DeviceName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DeviceString;
+            public uint StateFlags;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DeviceID;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string DeviceKey;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct SP_DEVINFO_DATA
+        {
+            public uint cbSize;
+            public Guid ClassGuid;
+            public uint DevInst;
+            public IntPtr Reserved;
+        }
+
+        private const uint DISPLAY_DEVICE_ACTIVE = 0x00000001;
+        private const uint DISPLAY_DEVICE_PRIMARY_DEVICE = 0x00000004;
+
+        // 显示器类 GUID - 改为只读字段，使用时复制到局部变量
+        private static readonly Guid GUID_DISPLAY_DEVICE = new Guid("{4d36e96e-e325-11ce-bfc1-08002be10318}");
+
+        private const uint DIF_PROPERTY_DISPLAY_NAME = 0x0000000A;
+        private const uint DIGCF_PRESENT = 0x00000002;
+
         public systeminfo()
         {
             InitializeComponent();
@@ -44,9 +96,7 @@ namespace SuperShop_Neko
 
                 moreinfo.Text = result;
                 moreinfo.SelectionStart = 0;
-                //moreinfo.ScrollToCaret();
 
-                // 加载到三个文本框
                 mother.Text = GetMotherboardInfo();
                 runtime.Text = GetSystemUptime();
                 windows.Text = GetWindowsVersion();
@@ -61,13 +111,26 @@ namespace SuperShop_Neko
         {
             try
             {
-                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Name,NumberOfCores FROM Win32_Processor"))
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(
+                    "SELECT Name, NumberOfCores, NumberOfLogicalProcessors FROM Win32_Processor"))
                 {
                     foreach (ManagementObject obj in searcher.Get())
                     {
                         string name = obj["Name"]?.ToString()?.Trim() ?? "";
-                        string cores = obj["NumberOfCores"]?.ToString() ?? "";
-                        return $"{name} {cores}核";
+                        uint cores = obj["NumberOfCores"] != null ? (uint)obj["NumberOfCores"] : 0;
+                        uint logical = obj["NumberOfLogicalProcessors"] != null ? (uint)obj["NumberOfLogicalProcessors"] : 0;
+
+                        name = System.Text.RegularExpressions.Regex.Replace(name, @"\s+", " ");
+
+                        if (cores > 0 && logical > 0 && logical > cores)
+                        {
+                            return $"{name} {cores}核{logical}线程";
+                        }
+                        else if (cores > 0)
+                        {
+                            return $"{name} {cores}核";
+                        }
+                        return name;
                     }
                 }
             }
@@ -127,54 +190,259 @@ namespace SuperShop_Neko
             return "未知";
         }
 
+        // 需要过滤的虚拟显卡关键字
+        private readonly string[] VirtualGPUKeywords = new string[]
+        {
+            "AskLinkIddDriver", "OrayIddDriver", "Oray",
+            "Remote", "Virtual", "Indirect", "Mirror", "RDP", "Citrix",
+            "TeamViewer", "VNC", "Sunshine", "Moonlight", "Parsec",
+            "IddDriver", "IndirectDisplay", "USB Display"
+        };
+
+        private bool IsVirtualGPU(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return true;
+            foreach (string keyword in VirtualGPUKeywords)
+            {
+                if (name.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+
+        private bool IsRealGPU(string name)
+        {
+            if (IsVirtualGPU(name)) return false;
+
+            string lowerName = name.ToLower();
+            string[] realBrands = { "intel", "nvidia", "amd", "radeon", "geforce", "quadro", "iris", "uhd", "rtx", "gtx", "rx" };
+
+            foreach (string brand in realBrands)
+            {
+                if (lowerName.Contains(brand))
+                    return true;
+            }
+
+            return !IsVirtualGPU(name);
+        }
+
         private string GetGPUInfo()
         {
             try
             {
-                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Name,AdapterRAM FROM Win32_VideoController WHERE CurrentHorizontalResolution != null"))
+                List<GPUInfo> gpuList = new List<GPUInfo>();
+
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(
+                    "SELECT Name, AdapterRAM, AdapterCompatibility, DriverVersion, VideoProcessor FROM Win32_VideoController"))
                 {
                     foreach (ManagementObject obj in searcher.Get())
                     {
                         string name = obj["Name"]?.ToString() ?? "";
-                        string ram = obj["AdapterRAM"]?.ToString();
+                        string compatibility = obj["AdapterCompatibility"]?.ToString() ?? "";
 
-                        if (!string.IsNullOrEmpty(name) && !name.Contains("Microsoft"))
+                        if (string.IsNullOrEmpty(name)) continue;
+
+                        GPUInfo gpu = new GPUInfo();
+                        gpu.Name = name;
+                        gpu.Compatibility = compatibility;
+
+                        if (obj["AdapterRAM"] != null && long.TryParse(obj["AdapterRAM"].ToString(), out long ram))
                         {
-                            if (long.TryParse(ram, out long ramBytes))
-                            {
-                                double ramGB = ramBytes / (1024.0 * 1024 * 1024);
-                                return $"{name} ({ramGB:F0}GB)";
-                            }
-                            return name;
+                            gpu.RAMBytes = ram;
                         }
+
+                        gpuList.Add(gpu);
                     }
                 }
+
+                var sortedGPUs = gpuList.OrderBy(g => {
+                    string lowerName = g.Name.ToLower();
+                    if (lowerName.Contains("intel")) return 0;
+                    if (lowerName.Contains("nvidia")) return 1;
+                    if (lowerName.Contains("amd")) return 2;
+                    if (lowerName.Contains("radeon")) return 3;
+                    if (IsVirtualGPU(g.Name)) return 100;
+                    return 50;
+                }).ToList();
+
+                var realGPU = sortedGPUs.FirstOrDefault(g => IsRealGPU(g.Name));
+
+                if (realGPU != null)
+                {
+                    return FormatGPUInfo(realGPU.Name, realGPU.RAMBytes);
+                }
+
+                var fallback = sortedGPUs.FirstOrDefault(g => !IsVirtualGPU(g.Name));
+                if (fallback != null)
+                {
+                    return FormatGPUInfo(fallback.Name, fallback.RAMBytes);
+                }
+
+                var last = gpuList.FirstOrDefault(g => !string.IsNullOrEmpty(g.Name));
+                if (last != null)
+                    return last.Name;
             }
             catch { }
             return "未知";
         }
 
+        private class GPUInfo
+        {
+            public string Name { get; set; } = "";
+            public string Compatibility { get; set; } = "";
+            public long RAMBytes { get; set; } = 0;
+        }
+
+        private string FormatGPUInfo(string name, long ramBytes)
+        {
+            name = System.Text.RegularExpressions.Regex.Replace(name, @"\s+", " ");
+
+            if (ramBytes > 0 && ramBytes != long.MaxValue)
+            {
+                double ramGB = ramBytes / (1024.0 * 1024 * 1024);
+                if (ramGB < 1)
+                {
+                    double ramMB = ramBytes / (1024.0 * 1024);
+                    if (ramMB > 0)
+                        return $"{name} ({ramMB:F0}MB)";
+                }
+                else if (ramGB < 100)
+                {
+                    return $"{name} ({ramGB:F1}GB)";
+                }
+            }
+            return name;
+        }
+
         private string GetMonitorInfo()
+        {
+            string monitorName = GetMonitorNameFromSetupAPI();
+            if (!string.IsNullOrEmpty(monitorName) &&
+                monitorName != "Generic PnP Monitor" &&
+                monitorName != "通用即插即用监视器")
+            {
+                int screenWidth = Screen.PrimaryScreen.Bounds.Width;
+                int screenHeight = Screen.PrimaryScreen.Bounds.Height;
+                return $"{monitorName} ({screenWidth}x{screenHeight})";
+            }
+
+            monitorName = GetMonitorNameFromEDID();
+            if (!string.IsNullOrEmpty(monitorName))
+            {
+                int screenWidth = Screen.PrimaryScreen.Bounds.Width;
+                int screenHeight = Screen.PrimaryScreen.Bounds.Height;
+                return $"{monitorName} ({screenWidth}x{screenHeight})";
+            }
+
+            try
+            {
+                int screenWidth = Screen.PrimaryScreen.Bounds.Width;
+                int screenHeight = Screen.PrimaryScreen.Bounds.Height;
+                return $"通用即插即用监视器 ({screenWidth}x{screenHeight})";
+            }
+            catch { }
+            return "通用即插即用监视器";
+        }
+
+        private string GetMonitorNameFromSetupAPI()
         {
             try
             {
-                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Name,ScreenWidth,ScreenHeight FROM Win32_DesktopMonitor"))
+                // 关键修复：将 static readonly GUID 复制到局部变量
+                Guid guid = GUID_DISPLAY_DEVICE;
+                IntPtr deviceInfoSet = SetupDiGetClassDevs(ref guid, IntPtr.Zero, IntPtr.Zero, DIGCF_PRESENT);
+
+                if (deviceInfoSet == IntPtr.Zero)
+                    return null;
+
+                SP_DEVINFO_DATA deviceInfoData = new SP_DEVINFO_DATA();
+                deviceInfoData.cbSize = (uint)Marshal.SizeOf(deviceInfoData);
+
+                for (uint memberIndex = 0; SetupDiEnumDeviceInfo(deviceInfoSet, memberIndex, ref deviceInfoData); memberIndex++)
+                {
+                    uint propertyRegDataType = 0;
+                    uint requiredSize = 0;
+
+                    SetupDiGetDeviceRegistryProperty(deviceInfoSet, ref deviceInfoData, DIF_PROPERTY_DISPLAY_NAME,
+                        ref propertyRegDataType, IntPtr.Zero, 0, ref requiredSize);
+
+                    if (requiredSize > 0)
+                    {
+                        IntPtr buffer = Marshal.AllocHGlobal((int)requiredSize);
+                        try
+                        {
+                            if (SetupDiGetDeviceRegistryProperty(deviceInfoSet, ref deviceInfoData, DIF_PROPERTY_DISPLAY_NAME,
+                                ref propertyRegDataType, buffer, requiredSize, ref requiredSize))
+                            {
+                                string name = Marshal.PtrToStringUni(buffer);
+                                if (!string.IsNullOrEmpty(name) &&
+                                    name != "Generic PnP Monitor" &&
+                                    name != "通用即插即用监视器")
+                                {
+                                    return name;
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            Marshal.FreeHGlobal(buffer);
+                        }
+                    }
+                }
+
+                SetupDiDestroyDeviceInfoList(deviceInfoSet);
+            }
+            catch { }
+            return null;
+        }
+
+        private string GetMonitorNameFromEDID()
+        {
+            try
+            {
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"\\.\ROOT\WMI",
+                    "SELECT ProductName, ManufacturerName, UserFriendlyName FROM WmiMonitorID"))
                 {
                     foreach (ManagementObject obj in searcher.Get())
                     {
-                        string name = obj["Name"]?.ToString() ?? "";
-                        string width = obj["ScreenWidth"]?.ToString() ?? "";
-                        string height = obj["ScreenHeight"]?.ToString() ?? "";
+                        if (obj["UserFriendlyName"] != null)
+                        {
+                            ushort[] nameArray = obj["UserFriendlyName"] as ushort[];
+                            if (nameArray != null && nameArray.Length > 0)
+                            {
+                                string name = Encoding.Unicode.GetString(Array.ConvertAll(nameArray, Convert.ToByte)).TrimEnd('\0');
+                                if (!string.IsNullOrEmpty(name) && !name.Contains("\0"))
+                                    return name;
+                            }
+                        }
 
-                        if (!string.IsNullOrEmpty(width) && !string.IsNullOrEmpty(height))
-                            return $"{name} ({width}x{height})";
-                        else if (!string.IsNullOrEmpty(name))
-                            return name;
+                        if (obj["ProductName"] != null)
+                        {
+                            ushort[] productArray = obj["ProductName"] as ushort[];
+                            if (productArray != null && productArray.Length > 0)
+                            {
+                                string product = Encoding.Unicode.GetString(Array.ConvertAll(productArray, Convert.ToByte)).TrimEnd('\0');
+                                if (!string.IsNullOrEmpty(product) && !product.Contains("\0"))
+                                {
+                                    if (obj["ManufacturerName"] != null)
+                                    {
+                                        ushort[] manuArray = obj["ManufacturerName"] as ushort[];
+                                        if (manuArray != null && manuArray.Length > 0)
+                                        {
+                                            string manufacturer = Encoding.Unicode.GetString(Array.ConvertAll(manuArray, Convert.ToByte)).TrimEnd('\0');
+                                            if (!string.IsNullOrEmpty(manufacturer))
+                                                return $"{manufacturer} {product}".Trim();
+                                        }
+                                    }
+                                    return product;
+                                }
+                            }
+                        }
                     }
                 }
             }
             catch { }
-            return "默认显示器";
+            return null;
         }
 
         private string GetDiskInfo()
@@ -216,7 +484,9 @@ namespace SuperShop_Neko
                     foreach (ManagementObject obj in searcher.Get())
                     {
                         string name = obj["Name"]?.ToString() ?? "";
-                        if (!string.IsNullOrEmpty(name) && !name.Contains("Virtual"))
+                        if (!string.IsNullOrEmpty(name) &&
+                            !name.Contains("Virtual") &&
+                            !name.Contains("IddDriver"))
                             sb.AppendLine($"    {name}");
                     }
                 }

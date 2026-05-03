@@ -70,7 +70,7 @@
             // label1
             // 
             label1.BackColor = Color.Transparent;
-            label1.Font = new Font("MiSans Medium", 15.7499981F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            label1.Font = new Font("MiSans Medium", 14F);
             label1.Location = new Point(18, 13);
             label1.Name = "label1";
             label1.Size = new Size(157, 23);
@@ -101,7 +101,7 @@
             // label2
             // 
             label2.BackColor = Color.Transparent;
-            label2.Font = new Font("MiSans Medium", 15.7499981F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            label2.Font = new Font("MiSans Medium", 14F);
             label2.Location = new Point(20, 13);
             label2.Name = "label2";
             label2.Size = new Size(124, 23);
@@ -132,7 +132,7 @@
             // label3
             // 
             label3.BackColor = Color.Transparent;
-            label3.Font = new Font("MiSans Medium", 15.7499981F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            label3.Font = new Font("MiSans Medium", 14F);
             label3.Location = new Point(21, 13);
             label3.Name = "label3";
             label3.Size = new Size(171, 23);
@@ -162,7 +162,7 @@
             // infotips
             // 
             infotips.BackColor = Color.Transparent;
-            infotips.Font = new Font("MiSans Medium", 15.7499981F, FontStyle.Regular, GraphicsUnit.Point, 134);
+            infotips.Font = new Font("MiSans Medium", 14F);
             infotips.Location = new Point(18, 17);
             infotips.Name = "infotips";
             infotips.Size = new Size(168, 23);

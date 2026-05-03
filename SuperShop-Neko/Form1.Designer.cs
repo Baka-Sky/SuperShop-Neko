@@ -61,7 +61,7 @@
             // user
             // 
             user.Image = Properties.Resources.用户__1_;
-            user.Location = new Point(621, 9);
+            user.Location = new Point(615, 9);
             user.Name = "user";
             user.Size = new Size(20, 20);
             user.SizeMode = PictureBoxSizeMode.Zoom;
@@ -71,9 +71,9 @@
             // 
             // labelTime1
             // 
-            labelTime1.Location = new Point(654, 8);
+            labelTime1.Location = new Point(643, 8);
             labelTime1.Name = "labelTime1";
-            labelTime1.Size = new Size(142, 24);
+            labelTime1.Size = new Size(153, 24);
             labelTime1.TabIndex = 0;
             labelTime1.Text = "labelTime1";
             // 
