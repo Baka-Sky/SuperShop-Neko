@@ -103,7 +103,18 @@ namespace SuperShop_Neko
         #region API调用方法
         private async Task<bool> TestApiConnection()
         {
-            return await AuthHelper.VerifyClientConnection();
+            try
+            {
+                bool connected = await AuthHelper.TestConnectionAsync();
+                if (!connected) return false;
+
+                return await AuthHelper.RefreshSessionAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"连接测试异常: {ex.Message}");
+                return false;
+            }
         }
 
         private async void LoadDataWithSpin()
@@ -115,12 +126,15 @@ namespace SuperShop_Neko
             {
                 try
                 {
-                    config.Text = "正在验证客户端...";
+                    config.Text = "正在初始化安全连接...";
+                    await Task.Delay(80);
+
+                    config.Text = "正在连接服务器...";
 
                     bool connected = await TestApiConnection();
                     if (!connected)
                     {
-                        config.Text = "客户端验证失败";
+                        config.Text = "连接失败";
                         this.Invoke(new Action(() =>
                         {
                             MessageBox.Show("客户端验证失败！\n请确保：\n1. Python后端正在运行\n2. 使用正确的软件版本\n3. 网络连接正常",
@@ -128,8 +142,15 @@ namespace SuperShop_Neko
                         }));
                         return;
                     }
+                    config.Text = "服务器连接成功";
 
-                    config.Text = "正在获取数据...";
+                    config.Text = "正在获取会话密钥...";
+                    await Task.Delay(50);
+
+                    config.Text = "正在生成请求签名...";
+                    await Task.Delay(50);
+
+                    config.Text = "正在发送数据请求...";
 
                     var requestData = new Dictionary<string, object>();
                     var response = await AuthHelper.SendAuthPostRequest("/get_apps", requestData);
@@ -163,6 +184,8 @@ namespace SuperShop_Neko
                         throw new Exception(errorMessage);
                     }
 
+                    config.Text = "正在解析服务器响应...";
+
                     string responseText = await response.Content.ReadAsStringAsync();
                     using (JsonDocument doc = JsonDocument.Parse(responseText))
                     {
@@ -176,10 +199,15 @@ namespace SuperShop_Neko
                             throw new Exception($"API错误: {error}");
                         }
 
+                        config.Text = "正在清空旧数据...";
                         dataList.Clear();
 
                         if (root.TryGetProperty("data", out JsonElement dataElement) && dataElement.ValueKind == JsonValueKind.Array)
                         {
+                            config.Text = "正在加载应用列表...";
+                            int totalItems = dataElement.GetArrayLength();
+                            int processed = 0;
+
                             foreach (JsonElement item in dataElement.EnumerateArray())
                             {
                                 string appId = item.TryGetProperty("AppID", out JsonElement appIdElement)
@@ -202,18 +230,26 @@ namespace SuperShop_Neko
                                     上传者 = who,
                                     出处 = form
                                 });
+
+                                processed++;
+                                if (processed % 3 == 0 || processed == totalItems)
+                                {
+                                    config.Text = $"正在加载应用列表... ({processed}/{totalItems})";
+                                }
                             }
                         }
 
                         int count = dataList.Count;
-                        config.Text = $"获取到 {count} 条数据";
+                        config.Text = $"加载完成，共 {count} 条数据";
 
                         this.Invoke(new Action(() =>
                         {
+                            config.Text = "正在渲染界面...";
                             BindDataToGridView();
                         }));
 
-                        config.Text = "加载完成";
+                        await Task.Delay(100);
+                        config.Text = $"完成，已加载 {count} 个应用";
                     }
                 }
                 catch (Exception ex)

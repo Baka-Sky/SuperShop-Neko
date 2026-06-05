@@ -99,6 +99,7 @@ namespace SuperShop_Neko
             username.Visible = false;
             upwho.Visible = false;
             userid.Visible = false;
+            label4.Visible = false;
             day.Visible = false;
             ifsu.Visible = false;
             exit.Visible = false;
@@ -122,6 +123,7 @@ namespace SuperShop_Neko
             username.Visible = true;
             upwho.Visible = true;
             userid.Visible = true;
+            label4.Visible = true;
             day.Visible = true;
             ifsu.Visible = true;
             exit.Visible = true;
@@ -713,9 +715,10 @@ namespace SuperShop_Neko
         // 注册按钮点击事件
         private void reg_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("注册功能暂未开放，请联系管理员", "提示",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            new Reg().ShowDialog();
         }
+
+
 
         // 调试信息输出
         private void DebugInfo(string message)

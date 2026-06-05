@@ -49,7 +49,7 @@
             username.Font = new Font("MiSans Medium", 15F);
             username.Location = new Point(31, 29);
             username.Name = "username";
-            username.Size = new Size(166, 29);
+            username.Size = new Size(506, 29);
             username.TabIndex = 0;
             username.Text = "你好,DevUser";
             // 
@@ -58,7 +58,7 @@
             day.Font = new Font("MiSans Medium", 15F);
             day.Location = new Point(31, 65);
             day.Name = "day";
-            day.Size = new Size(281, 29);
+            day.Size = new Size(526, 29);
             day.TabIndex = 1;
             day.Text = "超级小铺已陪伴您 XX天";
             // 
@@ -158,7 +158,7 @@
             upwho.Font = new Font("MiSans Medium", 15F);
             upwho.Location = new Point(31, 203);
             upwho.Name = "upwho";
-            upwho.Size = new Size(281, 29);
+            upwho.Size = new Size(451, 29);
             upwho.TabIndex = 7;
             upwho.Text = "代称为:XXX";
             // 
@@ -166,9 +166,9 @@
             // 
             AutoScaleDimensions = new SizeF(120F, 120F);
             AutoScaleMode = AutoScaleMode.Dpi;
+            Controls.Add(userpanel);
             Controls.Add(upwho);
             Controls.Add(exit);
-            Controls.Add(userpanel);
             Controls.Add(ifsu);
             Controls.Add(label4);
             Controls.Add(userid);
